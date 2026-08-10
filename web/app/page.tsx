@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Poster from "@/components/Poster";
 import { MESSAGES, SUBMESSAGES, CAM_CAPTIONS, CRITTERS } from "@/lib/messages";
-import { recordVisit, streakDays, type ParkStats } from "@/lib/stats";
+import Gauntlet, { type GatePass } from "@/components/Gauntlet";
+import { recordPass, recordVisit, streakDays, type ParkStats } from "@/lib/stats";
 import { loadConfig } from "@/lib/config";
 import { useHydrated } from "@/lib/useHydrated";
 import { resolveCamUrl } from "@/lib/trailcam";
@@ -19,9 +20,11 @@ function getVisitStats(): ParkStats {
 
 export default function Park() {
   const hydrated = useHydrated();
-  const stats = hydrated ? getVisitStats() : null;
+  const [freshStats, setFreshStats] = useState<ParkStats | null>(null);
+  const stats = freshStats ?? (hydrated ? getVisitStats() : null);
   const cfg = useMemo(() => (hydrated ? loadConfig() : null), [hydrated]);
   const [cam, setCam] = useState<{ src: string; caption: string } | null>(null);
+  const [gate, setGate] = useState<GatePass | null>(null);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -70,18 +73,44 @@ export default function Park() {
             <span className="field-label">Trail closures in effect</span>
             <div>
               {cfg.sites.map((site) => (
-                <div key={site} className="closure-row">
+                <div key={site} className="pass-row">
                   <span className="font-bold text-[15px]">{site}</span>
-                  <span className="caps-label">
-                    {site === cfg.workPermit.domain
-                      ? `closed · permit ${cfg.workPermit.min} min`
-                      : `closed · pass ${cfg.dayPassMin} min`}
+                  <span className="flex gap-2">
+                    <button
+                      className="pass-btn"
+                      onClick={() =>
+                        setGate({
+                          domain: site,
+                          minutes: cfg.dayPassMin,
+                          strict: cfg.strict.dayPass,
+                          kind: "day",
+                        })
+                      }
+                    >
+                      day pass · {cfg.dayPassMin}m
+                    </button>
+                    {site === cfg.workPermit.domain && (
+                      <button
+                        className="pass-btn pass-btn-pine"
+                        onClick={() =>
+                          setGate({
+                            domain: site,
+                            minutes: cfg.workPermit.min,
+                            strict: cfg.strict.workPermit,
+                            kind: "work",
+                          })
+                        }
+                      >
+                        permit · {cfg.workPermit.min}m
+                      </button>
+                    )}
                   </span>
                 </div>
               ))}
             </div>
             <p className="caps-label text-center mt-4">
-              pass gate opens with the games — next upgrade
+              day pass = beat all 3 games{cfg.strict.dayPass ? ", no misses" : " (retries ok)"} ·
+              permit = {cfg.strict.workPermit ? "flawless run" : "beat all 3"}
             </p>
             <div className="flex justify-center mt-3">
               <Link href="/settings" className="permit-link">
@@ -109,6 +138,14 @@ export default function Park() {
           </span>
         </footer>
       </div>
+
+      {gate && (
+        <Gauntlet
+          pass={gate}
+          onQuit={() => setGate(null)}
+          onIssued={() => setFreshStats(recordPass())}
+        />
+      )}
     </main>
   );
 }

@@ -272,6 +272,229 @@ body {
 }
 .closure-row:last-child { border-bottom: none; }
 
+/* ---------- ranger station (game gate) ---------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 42, 29, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 10;
+}
+
+.station {
+  background: var(--cream);
+  border: 5px solid var(--pine);
+  outline: 2px solid var(--rust);
+  outline-offset: -10px;
+  border-radius: 10px;
+  max-width: 560px;
+  width: 100%;
+  padding: 28px 30px;
+  max-height: 100dvh;
+  overflow-y: auto;
+}
+
+.station-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.station-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--rust);
+  margin-bottom: 4px;
+}
+
+.station-header h2 {
+  font-size: 22px;
+  color: var(--pine);
+}
+
+.quit {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  background: none;
+  border: none;
+  color: var(--rust);
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+  padding-top: 4px;
+  white-space: nowrap;
+}
+.quit:hover { color: var(--rust-dark); }
+
+.station-intro {
+  font-size: 14px;
+  color: var(--faded);
+  margin-bottom: 16px;
+}
+
+.station-body { min-height: 240px; }
+
+.start {
+  display: block;
+  margin: 70px auto 0;
+  font-weight: 700;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--cream);
+  background: var(--pine);
+  border: none;
+  border-bottom: 4px solid var(--pine-deep);
+  border-radius: 6px;
+  padding: 14px 38px;
+  cursor: pointer;
+}
+.start:hover { background: var(--pine-mid); }
+.start:active { transform: translateY(2px); border-bottom-width: 2px; }
+
+/* typing game */
+.type-target {
+  background: var(--cream-dark);
+  border: 2px solid var(--pine);
+  border-radius: 6px;
+  padding: 14px;
+  font-size: 16px;
+  line-height: 1.55;
+  margin-bottom: 12px;
+}
+.type-target .ok { color: var(--pine-mid); font-weight: 700; }
+.type-target .bad { color: var(--rust); font-weight: 700; }
+
+.type-input {
+  width: 100%;
+  border: 2px solid var(--pine);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 16px;
+  background: #FFFDF5;
+  color: var(--ink);
+  outline: none;
+}
+.type-input:focus { border-color: var(--rust); }
+.type-input.shake { animation: shake 0.3s; border-color: var(--rust); }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* memory game */
+.mem-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.mem-card {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  border: 2px solid var(--pine-deep);
+  background: var(--pine);
+  font-size: 28px;
+  cursor: pointer;
+  color: transparent;
+  background-image: radial-gradient(var(--cream) 12%, transparent 13%);
+  background-size: 14px 14px;
+}
+.mem-card:hover { background-color: var(--pine-mid); }
+.mem-card.flipped { background: var(--cream-dark); background-image: none; color: inherit; }
+.mem-card.matched { background: #FFFDF5; background-image: none; color: inherit; cursor: default; border-color: var(--mustard); }
+
+.mem-status, .react-status {
+  margin-top: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--faded);
+  text-align: center;
+}
+
+/* reaction game */
+.react-arena {
+  position: relative;
+  height: 260px;
+  background: linear-gradient(to bottom, var(--cream-dark) 0%, var(--sky) 85%);
+  border: 2px solid var(--pine);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: crosshair;
+}
+.react-target {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid var(--rust);
+  background: var(--mustard);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* result banners */
+.result {
+  padding: 40px 4px;
+  font-family: var(--font-slab), "Rockwell", serif;
+  font-size: 23px;
+  line-height: 1.25;
+  text-align: center;
+}
+.result.win { color: var(--pine); }
+.result.lose { color: var(--rust); }
+.result .sub {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--faded);
+}
+
+/* pass buttons on the park sign */
+.pass-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--pine);
+}
+.pass-row:last-child { border-bottom: none; }
+
+.pass-btn {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--cream);
+  background: var(--rust);
+  border: none;
+  border-bottom: 3px solid var(--rust-dark);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pass-btn:hover { background: var(--rust-dark); }
+.pass-btn:active { transform: translateY(1px); border-bottom-width: 2px; }
+.pass-btn.pass-btn-pine { background: var(--pine); border-bottom-color: var(--pine-deep); }
+.pass-btn.pass-btn-pine:hover { background: var(--pine-mid); }
+
 .critter {
   position: absolute;
   bottom: 14%;

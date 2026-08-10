@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated copy of shared/games.js (see scripts/sync-games.mjs).
+    "lib/vendor/**",
   ]),
 ]);
 
