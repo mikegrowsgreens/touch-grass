@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Touch Grass",
+  "version": "1.0.0",
+  "description": "Blocks the feeds. You're not giving anything up — you're getting your life back.",
+  "permissions": ["declarativeNetRequest", "storage", "alarms"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "options_page": "options.html",
+  "action": { "default_title": "Touch Grass — options" },
+  "web_accessible_resources": [
+    {
+      "resources": ["blocked.html"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "128": "icon128.png"
+  }
+}

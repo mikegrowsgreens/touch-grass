@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Touch Grass 🌿</title>
+  <link rel="stylesheet" href="blocked.css" />
+</head>
+<body>
+  <main class="card" id="card">
+    <div class="gif-frame" id="gifFrame">
+      <div class="fallback" id="fallback">
+        <div class="fallback-emoji" id="fallbackEmoji">🌿</div>
+        <div class="fallback-caption" id="fallbackCaption">grass: available for touching</div>
+      </div>
+    </div>
+
+    <h1 class="message" id="message">You're not giving anything up.</h1>
+    <p class="submessage" id="submessage"></p>
+
+    <div class="actions">
+      <button class="btn primary" id="btnLeave">🌿 Nice — carry on</button>
+      <button class="btn ghost" id="btnPause">I actually need this site (15 min)</button>
+      <button class="btn ghost" id="btnLinkedin">LinkedIn work session (60 min)</button>
+    </div>
+
+    <p class="stats" id="stats"></p>
+  </main>
+
+  <!-- Game gate overlay -->
+  <div class="overlay hidden" id="overlay">
+    <div class="game-card">
+      <div class="game-header">
+        <h2 id="gameTitle">Earn it 😌</h2>
+        <button class="btn tiny" id="gameQuit">never mind</button>
+      </div>
+      <p class="game-intro" id="gameIntro"></p>
+      <div id="gameArena"></div>
+    </div>
+  </div>
+
+  <script src="games/games.js"></script>
+  <script src="blocked.js"></script>
+</body>
+</html>
