@@ -2,8 +2,8 @@
 // for pages with a cached fallback, so the park (poster scene included)
 // renders with no connection.
 
-const CACHE = "tg-shell-v1";
-const SHELL = ["/", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
+const CACHE = "tg-shell-v2";
+const SHELL = ["/", "/shortcuts", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

@@ -1,7 +1,7 @@
 "use client";
 
-// Ranger station — 4-step onboarding. Phone setup guides (Private DNS,
-// Add to Home Screen) join this wizard in slice 5.
+// Ranger station — 6-step onboarding, ending with the phone guides
+// (Private DNS + Add to Home Screen) so the park lands installed and armed.
 
 import { useState } from "react";
 import Link from "next/link";
@@ -15,8 +15,9 @@ import {
 import { useHydrated } from "@/lib/useHydrated";
 import { PassRules, SitesPicker, ThemePicker } from "@/components/config/sections";
 import { RangerRadio } from "@/components/config/nextdns";
+import { HomeScreenGuide, PrivateDnsGuide } from "@/components/config/phone";
 
-const STEPS = ["Closures", "Trail cam", "Passes", "Radio"] as const;
+const STEPS = ["Closures", "Trail cam", "Passes", "Radio", "Phone", "Home screen"] as const;
 
 export default function Setup() {
   const router = useRouter();
@@ -75,6 +76,20 @@ export default function Setup() {
             <p className="caps-label mt-4">
               skip this and passes stay honor-system — connect any time in the park office
             </p>
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <p className="notice mb-5">Close the trails on the phone itself</p>
+            <PrivateDnsGuide />
+          </>
+        )}
+
+        {step === 5 && (
+          <>
+            <p className="notice mb-5">Make the park one tap away</p>
+            <HomeScreenGuide />
           </>
         )}
 

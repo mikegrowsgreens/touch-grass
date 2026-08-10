@@ -27,6 +27,37 @@ export default function Park() {
   const cfg = useMemo(() => (hydrated ? loadConfig() : null), [hydrated]);
   const [cam, setCam] = useState<{ src: string; caption: string } | null>(null);
   const [gate, setGate] = useState<GatePass | null>(null);
+  const [shared, setShared] = useState(false);
+
+  // Shares the park's front gate only — pass codes (config) live in the
+  // park office, and NextDNS keys never leave the device.
+  const sharePark = async () => {
+    const url = window.location.origin;
+    if (navigator.share) {
+      await navigator.share({ title: "Touch Grass National Park", url }).catch(() => {});
+      return;
+    }
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(url);
+      copied = true;
+    } catch {
+      // Clipboard API blocked (embedded browsers, old Safari) — textarea fallback.
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      copied = document.execCommand("copy");
+      ta.remove();
+    }
+    if (copied) {
+      setShared(true);
+      setTimeout(() => setShared(false), 2000);
+    }
+  };
 
   // Relock safety net: if the n8n ranger missed a scheduled relock (offline,
   // webhook down), re-close any expired passes on every park visit.
@@ -122,20 +153,31 @@ export default function Park() {
               day pass = beat all 3 games{cfg.strict.dayPass ? ", no misses" : " (retries ok)"} ·
               permit = {cfg.strict.workPermit ? "flawless run" : "beat all 3"}
             </p>
-            <div className="flex justify-center mt-3">
+            <div className="flex justify-center gap-4 mt-3">
               <Link href="/settings" className="permit-link">
                 park office — rules, themes &amp; pass codes
               </Link>
+              <button type="button" className="permit-link" onClick={sharePark}>
+                {shared ? "link copied ✓" : "share the park"}
+              </button>
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 mb-6">
+            <p className="text-center text-[14px]" style={{ color: "var(--faded)" }}>
+              Close your feeds for restoration. Getting back in costs three ranger
+              games in a row — win and one trail opens for a few minutes, then
+              relocks itself. Works phone-wide, no account, free forever.
+            </p>
             <Link href="/setup" className="cta no-underline">
               Set up my park
             </Link>
             <p className="caps-label text-center">
               passes · streaks · your own closures — 5 minutes
             </p>
+            <Link href="/settings" className="permit-link">
+              got a pass code from a friend? redeem it here
+            </Link>
           </div>
         )}
 
