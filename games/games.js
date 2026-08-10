@@ -135,9 +135,9 @@
   // ---------- 3. Reaction timer ----------
   function reactionGame(arena, ui, opts) {
     const ROUNDS = 7;
-    const WINDOW_MS = 700;
-    ui.title.textContent = "Whack the duck 🦆";
-    ui.intro.textContent = `Click the duck within 0.7s, ${ROUNDS} times in a row. Too slow = gauntlet resets.`;
+    const WINDOW_MS = 850;
+    ui.title.textContent = "Duck reflex 🦆";
+    ui.intro.textContent = `Click the duck within 0.85s, ${ROUNDS} times in a row. Too slow = gauntlet resets.`;
 
     arena.innerHTML = "";
     const field = document.createElement("div");

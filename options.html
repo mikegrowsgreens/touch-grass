@@ -2,64 +2,108 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Touch Grass — options</title>
+  <title>Touch Grass — park management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f2f8f2;
-      color: #17301c;
+      font-family: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+      background: #142A1D;
+      color: #22301F;
       display: flex;
       justify-content: center;
-      padding: 40px 20px;
+      padding: 40px 16px;
     }
-    .wrap { max-width: 520px; width: 100%; }
-    h1 { font-size: 24px; margin-bottom: 4px; }
-    .tag { color: #5a7a60; font-size: 14px; margin-bottom: 24px; }
-    label { display: block; font-weight: 600; font-size: 14px; margin: 18px 0 6px; }
-    .hint { font-size: 12px; color: #8aa890; margin-top: 4px; }
+    .sign {
+      background: #F3EAD3;
+      border: 6px solid #1E4231;
+      outline: 2px solid #C6552B;
+      outline-offset: -12px;
+      border-radius: 10px;
+      max-width: 540px;
+      width: 100%;
+      padding: 36px 38px 28px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    }
+    h1 {
+      font-family: "Alfa Slab One", "Rockwell", serif;
+      font-size: 30px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #1E4231;
+      text-align: center;
+    }
+    .tag {
+      margin-top: 6px;
+      margin-bottom: 26px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      color: #C6552B;
+      text-align: center;
+    }
+    label { display: block; font-weight: 700; font-size: 14px; margin: 18px 0 6px; color: #1E4231; }
+    .hint { font-size: 12px; color: #6E7A5E; margin-top: 5px; }
     textarea, input {
       width: 100%;
-      border: 2px solid #cfe3d3;
-      border-radius: 10px;
+      border: 2px solid #1E4231;
+      border-radius: 6px;
       padding: 10px;
       font-size: 14px;
       font-family: inherit;
       outline: none;
-      background: white;
+      background: #FFFDF5;
+      color: #22301F;
     }
     textarea { height: 140px; resize: vertical; }
-    textarea:focus, input:focus { border-color: #2e9e4f; }
+    textarea:focus, input:focus { border-color: #C6552B; }
     button {
-      margin-top: 20px;
-      background: #2e9e4f;
-      color: white;
+      margin-top: 22px;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #F3EAD3;
+      background: #C6552B;
       border: none;
-      border-radius: 10px;
-      padding: 12px 22px;
-      font-size: 15px;
-      font-weight: 600;
+      border-bottom: 4px solid #A64420;
+      border-radius: 6px;
+      padding: 12px 28px;
       cursor: pointer;
     }
-    button:hover { background: #1f7a3a; }
-    .saved { display: none; margin-left: 10px; color: #1f7a3a; font-weight: 600; }
-    .stats { margin-top: 28px; padding: 14px; background: #e7f3ea; border-radius: 10px; font-size: 14px; }
+    button:hover { background: #A64420; }
+    button:active { transform: translateY(2px); border-bottom-width: 2px; }
+    .saved { display: none; margin-left: 12px; color: #1E4231; font-weight: 700; }
+    .stats {
+      margin-top: 28px;
+      border-top: 2px dashed #1E4231;
+      padding-top: 14px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #6E7A5E;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>🌿 Touch Grass</h1>
-    <p class="tag">You're not giving anything up.</p>
+  <div class="sign">
+    <h1>Touch Grass</h1>
+    <p class="tag">Park management</p>
 
-    <label for="domains">Blocked domains (one per line)</label>
+    <label for="domains">Closed areas (one domain per line)</label>
     <textarea id="domains" spellcheck="false"></textarea>
-    <p class="hint">Subdomains are blocked automatically (instagram.com covers www, m., etc.)</p>
+    <p class="hint">Subdomains close automatically — instagram.com covers www, m., and friends.</p>
 
-    <label for="giphyKey">Giphy API key (optional — powers the GIFs)</label>
+    <label for="giphyKey">Giphy API key (optional)</label>
     <input id="giphyKey" type="text" placeholder="paste key from developers.giphy.com" />
-    <p class="hint">Free: developers.giphy.com → Create App → API. Without a key you get the emoji cards.</p>
+    <p class="hint">Without a key the trail cam shows cats via cataas.com. With one, it shows Giphy's finest.</p>
 
-    <button id="save">Save</button><span class="saved" id="saved">Saved ✓</span>
+    <button id="save">Post the notice</button><span class="saved" id="saved">Posted ✓</span>
 
     <div class="stats" id="stats"></div>
   </div>

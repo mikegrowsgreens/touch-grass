@@ -1,18 +1,18 @@
-# 🌿 Touch Grass
+# 🌿 Touch Grass National Park
 
-A Chrome extension that blocks social media and replaces every doomscroll attempt with a rotating funny, positive page. In the spirit of Allen Carr's *Easyway*: **you're not giving anything up** — there was nothing there.
+A Chrome extension that closes social media for maintenance, permanently. Every doomscroll attempt lands at the gates of Touch Grass National Park: a WPA-poster park sign, a trail-cam GIF of an animal having a better day than you, and a rotating trail notice in the spirit of Allen Carr's *Easyway* — **you're not giving anything up**; there was nothing there.
 
-Want in anyway? You have to **win a mini-game** first. On purpose.
+Want in anyway? Take it up with the ranger station.
 
 ## What it does
 
 - Blocks Facebook, Instagram, Threads, LinkedIn, and Strava (fully editable list) — including subdomains, including **Incognito**.
-- Every blocked visit shows a fresh card: a funny/positive one-liner + a GIF (via Giphy) + a "do this instead" nudge. No repeats until the pool cycles.
-- No off switch. To get in you must beat **all three games in a row** — lose any and you start over:
-  - **Typing gauntlet** — type a commitment sentence perfectly, one typo resets it
+- Every blocked visit shows a fresh trail notice + trail-cam footage (random cat GIFs out of the box via cataas.com; add a free Giphy key for the full zoo). No repeated notices until the pool cycles.
+- No off switch. Permits require beating **all three ranger challenges in a row** — lose any and you start over. Each one shows its rules and waits for you to hit Start:
+  - **Typing gauntlet** — type the posted sentence perfectly, one typo resets it
   - **Memory match** — 8 pairs in 12 tries
-  - **Whack the duck** — 7 clicks, each within 0.7 seconds
-- The prize is tiny on purpose: winning unlocks **only the one site you were visiting, for 2 minutes**. Everything else stays blocked. (Exception: a LinkedIn work session buys 30 minutes, for actual work.) Two-plus minutes of effort for two minutes of feed — the math is the deterrent.
+  - **Duck reflex** — 7 ducks, each clicked within 0.85 seconds
+- The prize is tiny on purpose: a **day pass unlocks only the one site you were visiting, for 2 minutes**. Everything else stays closed. (Exception: a LinkedIn **work permit** buys 30 minutes, for actual work.) Two-plus minutes of effort for two minutes of feed — the math is the deterrent.
 - Counts your "feeds dodged" so you can watch the number grow.
 
 ## Install (2 minutes)
@@ -25,9 +25,9 @@ Want in anyway? You have to **win a mini-game** first. On purpose.
 
 That's it — visit facebook.com to test.
 
-## Optional: GIFs
+## GIFs
 
-The block page works offline with animated emoji cards. For real GIFs:
+Cat GIFs work out of the box, no setup (cataas.com, keyless). Offline you get a hand-drawn CSS park scene with a wandering duck. For Giphy's full catalog instead of cats:
 
 1. Get a free key at [developers.giphy.com](https://developers.giphy.com) (Create App → API)
 2. Click the Touch Grass icon in the toolbar (opens options) → paste the key → Save

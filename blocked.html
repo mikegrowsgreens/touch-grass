@@ -3,38 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Touch Grass 🌿</title>
+  <title>Touch Grass National Park</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="blocked.css" />
 </head>
 <body>
-  <main class="card" id="card">
-    <div class="gif-frame" id="gifFrame">
-      <div class="fallback" id="fallback">
-        <div class="fallback-emoji" id="fallbackEmoji">🌿</div>
-        <div class="fallback-caption" id="fallbackCaption">grass: available for touching</div>
+  <main class="sign">
+    <header class="sign-top">
+      <div class="park-name">Touch Grass</div>
+      <div class="park-sub">National Park · est. today</div>
+    </header>
+
+    <!-- WPA poster scene: CSS only, works offline. Swapped for trail-cam GIF when one loads. -->
+    <div class="scene" id="scene">
+      <div class="poster" id="poster">
+        <div class="sun"></div>
+        <div class="mtn mtn-far"></div>
+        <div class="mtn mtn-mid"></div>
+        <div class="mtn mtn-near"></div>
+        <div class="meadow"></div>
+        <div class="grass">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="critter" id="critter">🦆</div>
+      </div>
+      <div class="scene-caption" id="gifCaption">scenic overlook nº 1</div>
+    </div>
+
+    <h1 class="notice" id="message">You are not giving anything up.</h1>
+    <p class="notice-sub" id="submessage"></p>
+
+    <div class="trailhead">
+      <button id="btnLeave" class="cta">Return to the trail</button>
+      <div class="permits">
+        <div class="permits-label">Ranger station · permits issued reluctantly</div>
+        <button id="btnPause" class="permit-link"></button>
+        <button id="btnLinkedin" class="permit-link"></button>
       </div>
     </div>
 
-    <h1 class="message" id="message">You're not giving anything up.</h1>
-    <p class="submessage" id="submessage"></p>
-
-    <div class="actions">
-      <button class="btn primary" id="btnLeave">🌿 Nice — carry on</button>
-      <button class="btn ghost" id="btnPause">I actually need this site (15 min)</button>
-      <button class="btn ghost" id="btnLinkedin">LinkedIn work session (60 min)</button>
-    </div>
-
-    <p class="stats" id="stats"></p>
+    <footer class="ledger" id="stats"></footer>
   </main>
 
-  <!-- Game gate overlay -->
+  <!-- Ranger station: the game gate -->
   <div class="overlay hidden" id="overlay">
-    <div class="game-card">
-      <div class="game-header">
-        <h2 id="gameTitle">Earn it 😌</h2>
-        <button class="btn tiny" id="gameQuit">never mind</button>
+    <div class="station">
+      <div class="station-header">
+        <div>
+          <div class="station-kicker">Ranger station</div>
+          <h2 id="gameTitle">Earn your pass</h2>
+        </div>
+        <button class="quit" id="gameQuit">never mind</button>
       </div>
-      <p class="game-intro" id="gameIntro"></p>
+      <p class="station-intro" id="gameIntro"></p>
       <div id="gameArena"></div>
     </div>
   </div>
