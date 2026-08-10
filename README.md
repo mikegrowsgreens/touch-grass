@@ -35,6 +35,12 @@ Cat GIFs work out of the box, no setup (cataas.com, keyless). Offline you get a 
 1. Get a free key at [developers.giphy.com](https://developers.giphy.com) (Create App → API)
 2. Click the Touch Grass icon in the toolbar (opens options) → paste the key → Save
 
+Or, if you cloned this repo: create a `giphy-key.js` in the extension folder (it's gitignored) containing
+
+```js
+window.TG_GIPHY_KEY = "your-key-here";
+```
+
 ## Edit the block list
 
 Click the extension icon → edit the domain list (one per line) → Save. Subdomains are covered automatically.

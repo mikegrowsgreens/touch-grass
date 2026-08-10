@@ -83,6 +83,8 @@ async function storageSet(obj) {
 
 async function init() {
   const state = await storageGet({ giphyKey: "", blocksDodged: 0, msgIndex: 0, nextGif: "" });
+  // options-page key wins; otherwise the local gitignored giphy-key.js
+  state.giphyKey = state.giphyKey || window.TG_GIPHY_KEY || "";
 
   // count the dodge
   const dodged = state.blocksDodged + 1;
