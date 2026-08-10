@@ -15,6 +15,7 @@ import {
 import { useHydrated } from "@/lib/useHydrated";
 import { decodePass, encodePass } from "@/lib/parkpass";
 import { PassRules, SitesPicker, ThemePicker } from "@/components/config/sections";
+import { RangerRadio } from "@/components/config/nextdns";
 
 export default function Settings() {
   const router = useRouter();
@@ -72,6 +73,10 @@ export default function Settings() {
           <SitesPicker sites={cfg.sites} onChange={(sites) => patch({ sites })} />
           <ThemePicker theme={cfg.theme} onChange={(theme) => patch({ theme })} />
           <PassRules cfg={cfg} onChange={patch} />
+
+          <div className="dashed-rule pt-5">
+            <RangerRadio sites={cfg.sites} />
+          </div>
 
           <section className="dashed-rule pt-5">
             <span className="field-label">Share your park — pass code</span>

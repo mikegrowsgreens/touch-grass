@@ -1,7 +1,7 @@
 "use client";
 
-// Ranger station — 3-step onboarding. Guided NextDNS + phone setup steps
-// join this wizard in slices 4–5.
+// Ranger station — 4-step onboarding. Phone setup guides (Private DNS,
+// Add to Home Screen) join this wizard in slice 5.
 
 import { useState } from "react";
 import Link from "next/link";
@@ -14,8 +14,9 @@ import {
 } from "@/lib/config";
 import { useHydrated } from "@/lib/useHydrated";
 import { PassRules, SitesPicker, ThemePicker } from "@/components/config/sections";
+import { RangerRadio } from "@/components/config/nextdns";
 
-const STEPS = ["Closures", "Trail cam", "Passes"] as const;
+const STEPS = ["Closures", "Trail cam", "Passes", "Radio"] as const;
 
 export default function Setup() {
   const router = useRouter();
@@ -64,6 +65,16 @@ export default function Setup() {
           <>
             <p className="notice mb-5">How do passes get issued?</p>
             <PassRules cfg={cfg} onChange={patch} />
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <p className="notice mb-5">Wire the radio to NextDNS? (optional)</p>
+            <RangerRadio sites={cfg.sites} />
+            <p className="caps-label mt-4">
+              skip this and passes stay honor-system — connect any time in the park office
+            </p>
           </>
         )}
 

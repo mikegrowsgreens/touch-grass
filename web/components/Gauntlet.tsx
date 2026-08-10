@@ -16,6 +16,9 @@ import {
   newGauntlet,
   type GauntletState,
 } from "@/lib/gauntlet";
+import { loadCreds, setActive } from "@/lib/nextdns";
+import { recordUnlock } from "@/lib/passes";
+import { scheduleRelock } from "@/lib/relock";
 
 export interface GatePass {
   domain: string;
@@ -30,6 +33,13 @@ type Phase =
   | { at: "banner"; win: boolean; head: string; sub: string }
   | { at: "issued" };
 
+// Radio = the NextDNS unlock riding along with an issued pass.
+type Radio =
+  | { state: "honorary" } // no NextDNS connected
+  | { state: "calling" }
+  | { state: "open"; until: number }
+  | { state: "failed"; why: string };
+
 const TOTAL = 3;
 
 export default function Gauntlet({
@@ -43,6 +53,7 @@ export default function Gauntlet({
 }) {
   const [g, setG] = useState<GauntletState>(() => newGauntlet(pass.strict));
   const [phase, setPhase] = useState<Phase>({ at: "ready" });
+  const [radio, setRadio] = useState<Radio>({ state: "honorary" });
   const arenaRef = useRef<HTMLDivElement>(null);
   // Stale-callback guard: a quit or reset mid-game bumps this, so a game's
   // late onWin/onLose (e.g. the duck timer) can't advance a dead run.
@@ -69,6 +80,24 @@ export default function Gauntlet({
     timer.current = setTimeout(() => setPhase({ at: "ready" }), delayMs);
   }
 
+  // Radio NextDNS: reopen this one trail, book the relock. The ledger write
+  // and n8n call must land even if the overlay closes — only setRadio is
+  // cosmetic. Failures leave the pass honorary (the site simply stays blocked).
+  async function unlockViaNextDns() {
+    const creds = loadCreds();
+    if (!creds) return; // radio stays "honorary"
+    setRadio({ state: "calling" });
+    try {
+      await setActive(creds, pass.domain, false);
+      const relockAt = Date.now() + pass.minutes * 60_000;
+      recordUnlock(pass.domain, relockAt);
+      void scheduleRelock(creds, pass.domain, relockAt); // fallback covers a miss
+      setRadio({ state: "open", until: relockAt });
+    } catch (e) {
+      setRadio({ state: "failed", why: e instanceof Error ? e.message : "radio silence" });
+    }
+  }
+
   function start() {
     const arena = arenaRef.current;
     if (!arena || typeof window === "undefined" || !window.TouchGrassGames) return;
@@ -86,6 +115,7 @@ export default function Gauntlet({
         if (r.done) {
           setPhase({ at: "issued" });
           onIssued();
+          void unlockViaNextDns();
           return;
         }
         setG(r.state);
@@ -164,10 +194,31 @@ export default function Gauntlet({
               <span className="sub">
                 {pass.domain} only, {pass.minutes} min. Everything else stays closed.
               </span>
-              <span className="sub">
-                The ranger&apos;s radio to NextDNS arrives in the next upgrade — for now this
-                pass is honorary, but your streak resets all the same.
-              </span>
+              {radio.state === "honorary" && (
+                <span className="sub">
+                  Honor-system pass — wire the ranger radio to NextDNS in the park office
+                  and wins will genuinely reopen the trail.
+                </span>
+              )}
+              {radio.state === "calling" && (
+                <span className="sub">Radioing NextDNS — reopening the trail…</span>
+              )}
+              {radio.state === "open" && (
+                <span className="sub">
+                  Trail open ✓ — relocks at{" "}
+                  {new Date(radio.until).toLocaleTimeString([], {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                  . New DNS can take a minute to reach the phone.
+                </span>
+              )}
+              {radio.state === "failed" && (
+                <span className="sub">
+                  Radio trouble ({radio.why}) — the trail stayed closed. Check the park
+                  office: is {pass.domain} on your denylist?
+                </span>
+              )}
               <a
                 className="cta cta-pine no-underline inline-block mt-5"
                 href={`https://${pass.domain === "linkedin.com" ? "www.linkedin.com" : pass.domain}`}

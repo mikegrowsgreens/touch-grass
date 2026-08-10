@@ -7,6 +7,8 @@ import { MESSAGES, SUBMESSAGES, CAM_CAPTIONS, CRITTERS } from "@/lib/messages";
 import Gauntlet, { type GatePass } from "@/components/Gauntlet";
 import { recordPass, recordVisit, streakDays, type ParkStats } from "@/lib/stats";
 import { loadConfig } from "@/lib/config";
+import { loadCreds } from "@/lib/nextdns";
+import { reactivateExpired } from "@/lib/passes";
 import { useHydrated } from "@/lib/useHydrated";
 import { resolveCamUrl } from "@/lib/trailcam";
 
@@ -25,6 +27,14 @@ export default function Park() {
   const cfg = useMemo(() => (hydrated ? loadConfig() : null), [hydrated]);
   const [cam, setCam] = useState<{ src: string; caption: string } | null>(null);
   const [gate, setGate] = useState<GatePass | null>(null);
+
+  // Relock safety net: if the n8n ranger missed a scheduled relock (offline,
+  // webhook down), re-close any expired passes on every park visit.
+  useEffect(() => {
+    if (!hydrated) return;
+    const creds = loadCreds();
+    if (creds) void reactivateExpired(creds).catch(() => {});
+  }, [hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
