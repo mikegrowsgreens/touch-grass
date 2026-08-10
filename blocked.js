@@ -129,53 +129,79 @@ async function init() {
   }
 }
 
-// ---------- game gate ----------
+// ---------- game gauntlet ----------
+// Beat ALL THREE games in a row. Any loss resets to game 1 in a new order.
+// The prize is tiny on purpose: the math should never feel worth it.
 
-let pending = null; // { mode, minutes }
-let lastGameKey = null;
+const UNLOCK_MINUTES = 2;
+const LINKEDIN_MINUTES = 30;
 
-function startGame() {
-  const arena = $("gameArena");
-  const ui = { title: $("gameTitle"), intro: $("gameIntro") };
-  lastGameKey = TouchGrassGames.startRandom(arena, ui, { onWin: won, onLose: lost }, lastGameKey);
+let pending = null; // { domain, minutes }
+let order = [];
+let step = 0;
+
+function progressLabel() {
+  return `Game ${step + 1} of 3`;
 }
 
-function openGate(mode, minutes) {
-  pending = { mode, minutes };
+function startStep() {
+  const arena = $("gameArena");
+  const ui = { title: $("gameTitle"), intro: $("gameIntro") };
+  TouchGrassGames.start(order[step], arena, ui, { onWin: wonStep, onLose: lost });
+  ui.title.textContent = `${progressLabel()} — ${ui.title.textContent}`;
+}
+
+function openGate(domain, minutes) {
+  pending = { domain, minutes };
+  order = TouchGrassGames.shuffle(TouchGrassGames.keys);
+  step = 0;
   $("overlay").classList.remove("hidden");
-  startGame();
+  startStep();
 }
 
 function lost() {
   const arena = $("gameArena");
-  arena.innerHTML = `<div class="result lose">Nope 😅<span class="sub">The feed isn't going anywhere. New game incoming…</span></div>`;
-  setTimeout(startGame, 1200);
+  arena.innerHTML = `<div class="result lose">Back to square one 😅<span class="sub">All three, in a row. Or — hear me out — don't.</span></div>`;
+  order = TouchGrassGames.shuffle(TouchGrassGames.keys);
+  step = 0;
+  setTimeout(startStep, 1400);
 }
 
-async function won() {
+function wonStep() {
+  step++;
+  if (step < 3) {
+    const arena = $("gameArena");
+    arena.innerHTML = `<div class="result win">${step} down, ${3 - step} to go<span class="sub">Still time to walk away with your dignity AND your afternoon.</span></div>`;
+    setTimeout(startStep, 1100);
+    return;
+  }
+  grandWin();
+}
+
+async function grandWin() {
   const arena = $("gameArena");
-  const { mode, minutes } = pending;
-  arena.innerHTML = `<div class="result win">Earned it 🎉<span class="sub">Unlocked for ${minutes} minutes. Timer's running.</span></div>`;
+  const { domain, minutes } = pending;
+  arena.innerHTML = `<div class="result win">Fine. You earned it 🎉<span class="sub">${domain} only, ${minutes} minutes. Everything else stays blocked. Clock's ticking.</span></div>`;
 
   if (ext && ext.runtime) {
     await new Promise((resolve) =>
-      ext.runtime.sendMessage({ type: "pause", mode, minutes }, resolve)
+      ext.runtime.sendMessage({ type: "pause", domain, minutes }, resolve)
     );
   }
 
   setTimeout(() => {
-    if (mode === "linkedin") {
-      location.href = "https://www.linkedin.com";
-    } else if (blockedSite) {
-      location.href = "https://" + blockedSite;
-    } else {
-      $("overlay").classList.add("hidden");
-    }
-  }, 1200);
+    location.href = "https://" + (domain === "linkedin.com" ? "www.linkedin.com" : domain);
+  }, 1400);
 }
 
-$("btnPause").addEventListener("click", () => openGate("all", 15));
-$("btnLinkedin").addEventListener("click", () => openGate("linkedin", 60));
+const unlockLabel = blockedSite
+  ? `Unlock ${blockedSite.replace(/^www\./, "")} (${UNLOCK_MINUTES} min) — beat all 3 games`
+  : `Unlock this site (${UNLOCK_MINUTES} min) — beat all 3 games`;
+$("btnPause").textContent = unlockLabel;
+$("btnLinkedin").textContent = `LinkedIn work session (${LINKEDIN_MINUTES} min) — beat all 3 games`;
+
+$("btnPause").addEventListener("click", () => openGate(blockedSite || "unknown", UNLOCK_MINUTES));
+$("btnLinkedin").addEventListener("click", () => openGate("linkedin.com", LINKEDIN_MINUTES));
 $("gameQuit").addEventListener("click", () => {
   $("overlay").classList.add("hidden");
   $("gameArena").innerHTML = "";

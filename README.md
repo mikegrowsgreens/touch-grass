@@ -8,11 +8,11 @@ Want in anyway? You have to **win a mini-game** first. On purpose.
 
 - Blocks Facebook, Instagram, Threads, LinkedIn, and Strava (fully editable list) — including subdomains, including **Incognito**.
 - Every blocked visit shows a fresh card: a funny/positive one-liner + a GIF (via Giphy) + a "do this instead" nudge. No repeats until the pool cycles.
-- No off switch. To pause you must beat one of three rotating games:
+- No off switch. To get in you must beat **all three games in a row** — lose any and you start over:
   - **Typing gauntlet** — type a commitment sentence perfectly, one typo resets it
-  - **Memory match** — 8 pairs in 16 tries
-  - **Whack the duck** — 5 sub-second reactions in a row
-- Win = **15-minute pause** (all sites) or a **60-minute LinkedIn work session** (LinkedIn only; everything else stays blocked).
+  - **Memory match** — 8 pairs in 12 tries
+  - **Whack the duck** — 7 clicks, each within 0.7 seconds
+- The prize is tiny on purpose: winning unlocks **only the one site you were visiting, for 2 minutes**. Everything else stays blocked. (Exception: a LinkedIn work session buys 30 minutes, for actual work.) Two-plus minutes of effort for two minutes of feed — the math is the deterrent.
 - Counts your "feeds dodged" so you can watch the number grow.
 
 ## Install (2 minutes)

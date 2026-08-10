@@ -234,8 +234,8 @@ body {
 }
 .react-target {
   position: absolute;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border: none;
   background: var(--grass);

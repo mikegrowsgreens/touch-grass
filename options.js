@@ -2,8 +2,7 @@ const DEFAULTS = {
   blocklist: ["facebook.com", "instagram.com", "threads.net", "linkedin.com", "strava.com"],
   giphyKey: "",
   blocksDodged: 0,
-  pauseAllUntil: 0,
-  pauseLinkedinUntil: 0
+  pauses: {}
 };
 
 async function load() {
@@ -12,12 +11,10 @@ async function load() {
   document.getElementById("giphyKey").value = s.giphyKey;
 
   const now = Date.now();
-  let pause = "";
-  if (s.pauseAllUntil > now) {
-    pause = ` · paused (all) until ${new Date(s.pauseAllUntil).toLocaleTimeString()}`;
-  } else if (s.pauseLinkedinUntil > now) {
-    pause = ` · LinkedIn work session until ${new Date(s.pauseLinkedinUntil).toLocaleTimeString()}`;
-  }
+  const active = Object.entries(s.pauses)
+    .filter(([, until]) => until > now)
+    .map(([d, until]) => `${d} unlocked until ${new Date(until).toLocaleTimeString()}`);
+  const pause = active.length ? ` · ${active.join(" · ")}` : "";
   document.getElementById("stats").textContent = `Feeds dodged so far: ${s.blocksDodged}${pause}`;
 }
 

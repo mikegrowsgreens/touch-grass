@@ -1,6 +1,6 @@
 // Touch Grass — service worker
 // Builds declarativeNetRequest redirect rules from the stored block list.
-// Game wins temporarily lift rules (all sites, or LinkedIn only) via chrome.alarms.
+// Winning the game gauntlet lifts the rule for ONE domain, briefly.
 
 const DEFAULT_BLOCKLIST = [
   "facebook.com",
@@ -11,14 +11,12 @@ const DEFAULT_BLOCKLIST = [
 ];
 
 const RULE_ID_BASE = 1000;
-const ALARM_RESUME_ALL = "resume-all";
-const ALARM_RESUME_LINKEDIN = "resume-linkedin";
+const ALARM_PREFIX = "resume:";
 
 async function getState() {
   const s = await chrome.storage.local.get({
     blocklist: DEFAULT_BLOCKLIST,
-    pauseAllUntil: 0,
-    pauseLinkedinUntil: 0
+    pauses: {} // { domain: unblockedUntilMs }
   });
   return s;
 }
@@ -40,7 +38,7 @@ function domainRule(domain, index) {
   };
 }
 
-// Rebuild all dynamic rules from storage, honoring active pauses.
+// Rebuild all dynamic rules from storage, honoring active per-domain pauses.
 // Serialized: concurrent triggers (onInstalled + storage.onChanged) would
 // otherwise both see the same "existing" rules and add duplicate IDs.
 let rebuildChain = Promise.resolve();
@@ -50,14 +48,10 @@ function rebuildRules() {
 }
 
 async function doRebuild() {
-  const { blocklist, pauseAllUntil, pauseLinkedinUntil } = await getState();
+  const { blocklist, pauses } = await getState();
   const now = Date.now();
 
-  const active = blocklist.filter((d) => {
-    if (pauseAllUntil > now) return false;
-    if (pauseLinkedinUntil > now && d.includes("linkedin")) return false;
-    return true;
-  });
+  const active = blocklist.filter((d) => !(pauses[d] > now));
 
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   await chrome.declarativeNetRequest.updateDynamicRules({
@@ -66,15 +60,13 @@ async function doRebuild() {
   });
 }
 
-async function pause(mode, minutes) {
+// Unblock a single domain for `minutes`. Everything else stays blocked.
+async function pauseDomain(domain, minutes) {
+  const { pauses } = await getState();
   const until = Date.now() + minutes * 60 * 1000;
-  if (mode === "linkedin") {
-    await chrome.storage.local.set({ pauseLinkedinUntil: until });
-    chrome.alarms.create(ALARM_RESUME_LINKEDIN, { when: until + 1000 });
-  } else {
-    await chrome.storage.local.set({ pauseAllUntil: until });
-    chrome.alarms.create(ALARM_RESUME_ALL, { when: until + 1000 });
-  }
+  pauses[domain] = until;
+  await chrome.storage.local.set({ pauses });
+  chrome.alarms.create(ALARM_PREFIX + domain, { when: until + 1000 });
   await rebuildRules();
 }
 
@@ -87,13 +79,11 @@ chrome.runtime.onInstalled.addListener(async () => {
 chrome.runtime.onStartup.addListener(rebuildRules);
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-  if (alarm.name === ALARM_RESUME_ALL) {
-    await chrome.storage.local.set({ pauseAllUntil: 0 });
-  } else if (alarm.name === ALARM_RESUME_LINKEDIN) {
-    await chrome.storage.local.set({ pauseLinkedinUntil: 0 });
-  } else {
-    return;
-  }
+  if (!alarm.name.startsWith(ALARM_PREFIX)) return;
+  const domain = alarm.name.slice(ALARM_PREFIX.length);
+  const { pauses } = await getState();
+  delete pauses[domain];
+  await chrome.storage.local.set({ pauses });
   await rebuildRules();
 });
 
@@ -104,7 +94,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg && msg.type === "pause") {
-    pause(msg.mode, msg.minutes).then(() => sendResponse({ ok: true }));
+    pauseDomain(msg.domain, msg.minutes).then(() => sendResponse({ ok: true }));
     return true; // async response
   }
   if (msg && msg.type === "rebuild") {

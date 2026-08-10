@@ -1,14 +1,13 @@
-// Touch Grass — the game gate. Win one to earn a pause.
-// Each game calls opts.onWin() or opts.onLose(). Runner picks a random game,
-// never repeating the one just lost.
+// Touch Grass — the game gate. Beat ALL THREE, in a row, to earn a tiny unlock.
+// Each game calls opts.onWin() or opts.onLose(). The gauntlet runner lives in blocked.js.
 
 (function () {
   const SENTENCES = [
-    "I am not giving anything up. I am getting my time back.",
-    "There is nothing on the feed that my life is missing.",
-    "I do not need to escape into a screen to feel good.",
-    "Scrolling was never the reward. Stopping is the reward.",
-    "I am free, and free people do not beg an algorithm for crumbs."
+    "I am not giving anything up. I am getting my time back, and I would rather be here typing this than scrolling.",
+    "There is nothing on the feed that my life is missing. The craving passes in about forty seconds and I outlast it.",
+    "I do not need to escape into a screen to feel good. The feed was the itch, never the scratch.",
+    "Scrolling was never the reward. Stopping is the reward, and I am collecting it right now, one keystroke at a time.",
+    "I am free, and free people do not beg an algorithm for crumbs. I came here on autopilot and I am leaving on purpose."
   ];
 
   const EMOJIS = ["🌿", "🌞", "🦆", "🍉", "🛶", "🌵", "🪴", "🐢"];
@@ -70,9 +69,9 @@
 
   // ---------- 2. Memory match ----------
   function memoryGame(arena, ui, opts) {
-    const MAX_ATTEMPTS = 16;
+    const MAX_ATTEMPTS = 12;
     ui.title.textContent = "Memory match 🧠";
-    ui.intro.textContent = `Match all 8 pairs in ${MAX_ATTEMPTS} tries or start over.`;
+    ui.intro.textContent = `Match all 8 pairs in ${MAX_ATTEMPTS} tries or the whole gauntlet resets.`;
 
     arena.innerHTML = "";
     const grid = document.createElement("div");
@@ -135,10 +134,10 @@
 
   // ---------- 3. Reaction timer ----------
   function reactionGame(arena, ui, opts) {
-    const ROUNDS = 5;
-    const WINDOW_MS = 1000;
+    const ROUNDS = 7;
+    const WINDOW_MS = 700;
     ui.title.textContent = "Whack the duck 🦆";
-    ui.intro.textContent = `Click the duck within 1 second, ${ROUNDS} times in a row. Too slow = start over.`;
+    ui.intro.textContent = `Click the duck within 0.7s, ${ROUNDS} times in a row. Too slow = gauntlet resets.`;
 
     arena.innerHTML = "";
     const field = document.createElement("div");
@@ -158,14 +157,14 @@
 
     function spawn() {
       if (dead) return;
-      const delay = 600 + Math.random() * 1200;
+      const delay = 500 + Math.random() * 1300;
       setTimeout(() => {
         if (dead) return;
         const duck = document.createElement("button");
         duck.className = "react-target";
         duck.textContent = "🦆";
-        const maxX = field.clientWidth - 60;
-        const maxY = field.clientHeight - 60;
+        const maxX = field.clientWidth - 52;
+        const maxY = field.clientHeight - 52;
         duck.style.left = Math.random() * maxX + "px";
         duck.style.top = Math.random() * maxY + "px";
         duck.addEventListener("click", () => {
@@ -194,19 +193,17 @@
     spawn();
   }
 
-  const GAMES = [
-    { key: "typing", run: typingGame },
-    { key: "memory", run: memoryGame },
-    { key: "reaction", run: reactionGame }
-  ];
+  const GAMES = {
+    typing: typingGame,
+    memory: memoryGame,
+    reaction: reactionGame
+  };
 
   window.TouchGrassGames = {
-    // Starts a random game (never `avoidKey`). Returns the chosen key.
-    startRandom(arena, ui, opts, avoidKey) {
-      const pool = GAMES.filter((g) => g.key !== avoidKey);
-      const game = pool[Math.floor(Math.random() * pool.length)];
-      game.run(arena, ui, opts);
-      return game.key;
+    keys: Object.keys(GAMES),
+    shuffle,
+    start(key, arena, ui, opts) {
+      GAMES[key](arena, ui, opts);
     }
   };
 })();
