@@ -1,0 +1,13 @@
+{
+  "name": "Touch Grass National Park",
+  "short_name": "Touch Grass",
+  "description": "Closes social media for maintenance, permanently. You're not giving anything up.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F3EAD3",
+  "theme_color": "#142A1D",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
