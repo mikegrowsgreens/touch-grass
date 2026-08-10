@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Built locally, shipped as artifacts — the droplet OOM-kills Next builds.
+  output: "standalone",
 };
 
 export default nextConfig;
