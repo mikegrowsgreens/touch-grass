@@ -41,7 +41,15 @@ function domainRule(domain, index) {
 }
 
 // Rebuild all dynamic rules from storage, honoring active pauses.
-async function rebuildRules() {
+// Serialized: concurrent triggers (onInstalled + storage.onChanged) would
+// otherwise both see the same "existing" rules and add duplicate IDs.
+let rebuildChain = Promise.resolve();
+function rebuildRules() {
+  rebuildChain = rebuildChain.then(doRebuild, doRebuild);
+  return rebuildChain;
+}
+
+async function doRebuild() {
   const { blocklist, pauseAllUntil, pauseLinkedinUntil } = await getState();
   const now = Date.now();
 
