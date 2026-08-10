@@ -190,6 +190,88 @@ body {
   50%      { transform: rotate(5deg); }
 }
 
+/* ---------- ranger station forms ---------- */
+
+.chip {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--pine);
+  background: var(--cream-dark);
+  border: 2px solid var(--pine);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.chip[aria-pressed="true"] {
+  background: var(--pine);
+  color: var(--cream);
+}
+.chip:hover { border-color: var(--rust); }
+
+.field {
+  width: 100%;
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  border: 2px solid var(--pine);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.field:focus { outline: 3px solid var(--mustard); outline-offset: 1px; }
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--pine);
+  margin-bottom: 6px;
+}
+
+.opt-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--cream-dark);
+  border: 2px solid var(--pine);
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+.opt-card[aria-pressed="true"] {
+  background: var(--pine);
+  color: var(--cream);
+}
+.opt-card[aria-pressed="true"] .caps-label { color: var(--mustard); }
+.opt-card:hover { border-color: var(--rust); }
+
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cream-dark);
+  border: 2px solid var(--pine);
+}
+.step-dot[data-active="true"] { background: var(--rust); border-color: var(--rust); }
+
+.pass-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.closure-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--pine);
+}
+.closure-row:last-child { border-bottom: none; }
+
 .critter {
   position: absolute;
   bottom: 14%;
