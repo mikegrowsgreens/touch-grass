@@ -50,10 +50,12 @@ const SUBMESSAGES = [
   "The dishes. Weirdly powerful."
 ];
 
-const GIPHY_TERMS = [
-  "celebration", "happy dance", "freedom", "good vibes", "victory",
-  "dog party", "cat vibes", "nature", "sunshine", "high five"
-];
+// Theme → Giphy term pools, mirroring the web app's /api/gif route. Cats
+// stay keyless via cataas; other themes need a Giphy key or fall back.
+const THEME_TERMS = {
+  dogs: ["funny dog", "puppy", "dog party", "good dog", "dog zoomies"],
+  nature: ["nature", "forest", "mountain river", "sunrise timelapse", "ocean waves", "wildlife"]
+};
 
 const CAM_CAPTIONS = [
   "trail cam · wildlife, unbothered, not scrolling",
@@ -65,12 +67,18 @@ const CAM_CAPTIONS = [
 
 const CRITTERS = ["🦆", "🐢", "🦌", "🐇", "🦃"];
 
-const UNLOCK_MINUTES = 2;
-const LINKEDIN_MINUTES = 30;
+// Fallbacks when no park pass has ever been imported (pre-v1.1 installs).
+const DEFAULT_PARK_CONFIG = {
+  dayPassMin: 2,
+  workPermit: { domain: "linkedin.com", min: 30 },
+  strict: { dayPass: false, workPermit: true },
+  theme: { preset: "cats" }
+};
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const blockedSite = params.get("site") || "";
+let parkConfig = DEFAULT_PARK_CONFIG;
 
 async function storageGet(defaults) {
   if (!ext) return defaults;
@@ -82,9 +90,18 @@ async function storageSet(obj) {
 }
 
 async function init() {
-  const state = await storageGet({ giphyKey: "", blocksDodged: 0, msgIndex: 0, nextGif: "" });
+  const state = await storageGet({
+    giphyKey: "",
+    blocksDodged: 0,
+    msgIndex: 0,
+    nextGif: "",
+    parkConfig: null
+  });
   // options-page key wins; otherwise the local gitignored giphy-key.js
   state.giphyKey = state.giphyKey || window.TG_GIPHY_KEY || "";
+  // parkConfig is sanitized by the options page on every save/import.
+  if (state.parkConfig) parkConfig = { ...DEFAULT_PARK_CONFIG, ...state.parkConfig };
+  wireGateButtons();
 
   // count the dodge
   const dodged = state.blocksDodged + 1;
@@ -121,14 +138,20 @@ function showCamImage(src) {
 }
 
 async function resolveGifUrl(giphyKey) {
-  if (giphyKey) {
-    const term = GIPHY_TERMS[Math.floor(Math.random() * GIPHY_TERMS.length)];
+  const theme = parkConfig.theme || DEFAULT_PARK_CONFIG.theme;
+  const pool =
+    theme.preset === "custom" && Array.isArray(theme.terms) && theme.terms.length
+      ? theme.terms
+      : THEME_TERMS[theme.preset];
+  if (giphyKey && pool) {
+    const term = pool[Math.floor(Math.random() * pool.length)];
     const res = await fetch(
       `https://api.giphy.com/v1/gifs/random?api_key=${encodeURIComponent(giphyKey)}&tag=${encodeURIComponent(term)}&rating=pg`
     );
     const json = await res.json();
     return json?.data?.images?.downsized_medium?.url || json?.data?.images?.original?.url || "";
   }
+  // cats theme, no key, or no pool — resident mousers cover every shortage
   return "https://cataas.com/cat/gif?width=640&ts=" + Date.now();
 }
 
@@ -253,12 +276,23 @@ async function grandWin() {
   }, 1400);
 }
 
-const siteName = (blockedSite || "this site").replace(/^www\./, "");
-$("btnPause").textContent = `Day pass: ${siteName} · ${UNLOCK_MINUTES} min · beat all 3 challenges`;
-$("btnLinkedin").textContent = `Work permit: linkedin.com · ${LINKEDIN_MINUTES} min · beat all 3 without a single loss`;
-
-$("btnPause").addEventListener("click", () => openGate(blockedSite || "unknown", UNLOCK_MINUTES, false));
-$("btnLinkedin").addEventListener("click", () => openGate("linkedin.com", LINKEDIN_MINUTES, true));
+// Pass buttons honor the park config (durations, strictness, work-permit
+// domain) — wired from init() once parkConfig is loaded.
+function wireGateButtons() {
+  const siteName = (blockedSite || "this site").replace(/^www\./, "");
+  const wp = parkConfig.workPermit;
+  const rule = (strict) => (strict ? "beat all 3 without a single loss" : "beat all 3 challenges");
+  $("btnPause").textContent =
+    `Day pass: ${siteName} · ${parkConfig.dayPassMin} min · ${rule(parkConfig.strict.dayPass)}`;
+  $("btnLinkedin").textContent =
+    `Work permit: ${wp.domain} · ${wp.min} min · ${rule(parkConfig.strict.workPermit)}`;
+  $("btnPause").addEventListener("click", () =>
+    openGate(blockedSite || "unknown", parkConfig.dayPassMin, parkConfig.strict.dayPass)
+  );
+  $("btnLinkedin").addEventListener("click", () =>
+    openGate(wp.domain, wp.min, parkConfig.strict.workPermit)
+  );
+}
 
 $("gameQuit").addEventListener("click", () => {
   $("overlay").classList.add("hidden");

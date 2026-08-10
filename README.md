@@ -1,5 +1,12 @@
 # 🌿 Touch Grass National Park
 
+Two ways in to the park:
+
+- **Chrome extension** (`extension/`) — blocks the feeds on desktop Chrome. Install below, or from the Chrome Web Store (link coming once the listing is live — see [STORE-LISTING.md](STORE-LISTING.md)).
+- **Web park + phone** (`web/`) — installable PWA at [touchgrass.mikegrowsgreens.com](https://touchgrass.mikegrowsgreens.com) that blocks sites on your *phone* via NextDNS. Guided setup included.
+
+One **park pass code** (options page ↔ web settings) moves your whole setup — sites, pass rules, trail-cam theme — between both, and to friends. Codes never contain API keys.
+
 A Chrome extension that closes social media for maintenance, permanently. Every doomscroll attempt lands at the gates of Touch Grass National Park: a WPA-poster park sign, a trail-cam GIF of an animal having a better day than you, and a rotating trail notice in the spirit of Allen Carr's *Easyway* — **you're not giving anything up**; there was nothing there.
 
 Want in anyway? Take it up with the ranger station.
@@ -23,7 +30,7 @@ Want in anyway? Take it up with the ranger station.
 1. Download this repo: green **Code** button → **Download ZIP** → unzip. (Or `git clone`.)
 2. In Chrome, open `chrome://extensions`
 3. Toggle **Developer mode** on (top right)
-4. Click **Load unpacked** → select the `touch-grass` folder
+4. Click **Load unpacked** → select the `extension/` folder inside the repo
 5. Recommended: click **Details** on the extension → enable **Allow in Incognito** (otherwise private windows bypass it)
 
 That's it — visit facebook.com to test.
@@ -35,7 +42,7 @@ Cat GIFs work out of the box, no setup (cataas.com, keyless). Offline you get a 
 1. Get a free key at [developers.giphy.com](https://developers.giphy.com) (Create App → API)
 2. Click the Touch Grass icon in the toolbar (opens options) → paste the key → Save
 
-Or, if you cloned this repo: create a `giphy-key.js` in the extension folder (it's gitignored) containing
+Or, if you cloned this repo: create a `giphy-key.js` in the `extension/` folder (it's gitignored) containing
 
 ```js
 window.TG_GIPHY_KEY = "your-key-here";

@@ -77,6 +77,25 @@
     button:hover { background: #A64420; }
     button:active { transform: translateY(2px); border-bottom-width: 2px; }
     .saved { display: none; margin-left: 12px; color: #1E4231; font-weight: 700; }
+    .pass-block { margin-top: 30px; border-top: 2px dashed #1E4231; padding-top: 18px; }
+    .pass-block h2 {
+      font-family: "Alfa Slab One", "Rockwell", serif;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #1E4231;
+    }
+    #passCode { height: 84px; font-size: 12px; word-break: break-all; }
+    .pass-row { display: flex; gap: 10px; align-items: center; }
+    .pass-row button { margin-top: 14px; padding: 10px 20px; }
+    .pass-row .secondary {
+      background: #1E4231;
+      border-bottom-color: #142A1D;
+    }
+    .pass-row .secondary:hover { background: #142A1D; }
+    .pass-status { margin-top: 12px; font-size: 13px; font-weight: 600; }
+    .pass-status.ok { color: #1E4231; }
+    .pass-status.bad { color: #C6552B; }
     .stats {
       margin-top: 28px;
       border-top: 2px dashed #1E4231;
@@ -105,8 +124,21 @@
 
     <button id="save">Post the notice</button><span class="saved" id="saved">Posted ✓</span>
 
+    <div class="pass-block">
+      <h2>Park pass</h2>
+      <p class="hint">Move your setup between the web park (touchgrass.mikegrowsgreens.com), this extension, and friends. Codes carry sites, pass rules, and theme — never API keys.</p>
+      <label for="passCode">Pass code</label>
+      <textarea id="passCode" spellcheck="false" placeholder="TGP1."></textarea>
+      <div class="pass-row">
+        <button id="passImport">Import pass</button>
+        <button id="passExport" class="secondary">Export mine</button>
+        <span class="saved" id="passCopied">Copied ✓</span>
+      </div>
+      <p class="pass-status" id="passStatus"></p>
+    </div>
+
     <div class="stats" id="stats"></div>
   </div>
-  <script src="options.js"></script>
+  <script type="module" src="options.js"></script>
 </body>
 </html>

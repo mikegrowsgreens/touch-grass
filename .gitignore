@@ -1,3 +1,6 @@
 # local Giphy key — never commit (public repo)
 giphy-key.js
 .DS_Store
+
+# store zips are build artifacts (scripts/build-store-zip.sh)
+dist/

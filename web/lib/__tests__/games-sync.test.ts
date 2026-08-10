@@ -1,4 +1,4 @@
-// shared/games.js is the single source; games/games.js (extension) and
+// shared/games.js is the single source; extension/games/games.js and
 // web/lib/vendor/games.js (web) are generated copies. If someone edits a
 // copy — or edits the source and forgets `npm run sync:games` — fail here.
 import { readFileSync } from "node:fs";
@@ -12,7 +12,7 @@ const source = readFileSync(join(root, "shared", "games.js"), "utf8");
 
 describe("games.js sync", () => {
   it.each([
-    ["extension copy", join("games", "games.js")],
+    ["extension copy", join("extension", "games", "games.js")],
     ["web vendor copy", join("web", "lib", "vendor", "games.js")],
   ])("%s matches shared/games.js — run `npm run sync:games` if not", (_label, rel) => {
     expect(readFileSync(join(root, rel), "utf8")).toBe(source);
