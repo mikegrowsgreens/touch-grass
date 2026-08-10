@@ -3,11 +3,11 @@
 
 (function () {
   const SENTENCES = [
-    "I am not giving anything up. I am getting my time back, and I would rather be here typing this than scrolling.",
-    "There is nothing on the feed that my life is missing. The craving passes in about forty seconds and I outlast it.",
-    "I do not need to escape into a screen to feel good. The feed was the itch, never the scratch.",
-    "Scrolling was never the reward. Stopping is the reward, and I am collecting it right now, one keystroke at a time.",
-    "I am free, and free people do not beg an algorithm for crumbs. I came here on autopilot and I am leaving on purpose."
+    "I am not giving anything up. I am getting my time back.",
+    "There is nothing on the feed that my life is missing.",
+    "The feed was the itch, never the scratch.",
+    "Scrolling was never the reward. Stopping is the reward.",
+    "I came here on autopilot and I am leaving on purpose."
   ];
 
   const EMOJIS = ["🌿", "🌞", "🦆", "🍉", "🛶", "🌵", "🪴", "🐢"];
@@ -69,7 +69,9 @@
 
   // ---------- 2. Memory match ----------
   function memoryGame(arena, ui, opts) {
-    const MAX_ATTEMPTS = 12;
+    // <16 tries on 8 pairs is rated "excellent" play; 20 keeps it winnable
+    // for normal humans while still being a real limit.
+    const MAX_ATTEMPTS = 20;
     ui.title.textContent = "Memory match 🧠";
     ui.intro.textContent = `Match all 8 pairs in ${MAX_ATTEMPTS} tries or the whole gauntlet resets.`;
 
@@ -134,10 +136,12 @@
 
   // ---------- 3. Reaction timer ----------
   function reactionGame(arena, ui, opts) {
-    const ROUNDS = 7;
-    const WINDOW_MS = 850;
+    // Whack-a-mole studies put the MEDIAN click-after-appearance at ~1.12s,
+    // so 1.25s is beatable by normal humans yet still demands attention.
+    const ROUNDS = 5;
+    const WINDOW_MS = 1250;
     ui.title.textContent = "Duck reflex 🦆";
-    ui.intro.textContent = `Click the duck within 0.85s, ${ROUNDS} times in a row. Too slow = gauntlet resets.`;
+    ui.intro.textContent = `Click the duck within 1.25s, ${ROUNDS} times in a row.`;
 
     arena.innerHTML = "";
     const field = document.createElement("div");

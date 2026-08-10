@@ -8,11 +8,14 @@ Want in anyway? Take it up with the ranger station.
 
 - Blocks Facebook, Instagram, Threads, LinkedIn, and Strava (fully editable list) — including subdomains, including **Incognito**.
 - Every blocked visit shows a fresh trail notice + trail-cam footage (random cat GIFs out of the box via cataas.com; add a free Giphy key for the full zoo). No repeated notices until the pool cycles.
-- No off switch. Permits require beating **all three ranger challenges in a row** — lose any and you start over. Each one shows its rules and waits for you to hit Start:
-  - **Typing gauntlet** — type the posted sentence perfectly, one typo resets it
-  - **Memory match** — 8 pairs in 12 tries
-  - **Duck reflex** — 7 ducks, each clicked within 0.85 seconds
-- The prize is tiny on purpose: a **day pass unlocks only the one site you were visiting, for 2 minutes**. Everything else stays closed. (Exception: a LinkedIn **work permit** buys 30 minutes, for actual work.) Two-plus minutes of effort for two minutes of feed — the math is the deterrent.
+- No off switch. Permits require beating **all three ranger challenges**. Each one shows its rules and waits for you to hit Start:
+  - **Typing gauntlet** — type the posted sentence perfectly, one typo resets it (the same pattern Cold Turkey and StayFocusd use for their unlock challenges)
+  - **Memory match** — 8 pairs in 20 tries (under 16 is considered excellent play, so normal humans can pass)
+  - **Duck reflex** — 5 ducks, each clicked within 1.25 seconds (median human click-on-target time is ~1.12s)
+- Two tiers of stakes:
+  - **Day pass** — 2 minutes, only the one site you were visiting. Lose a challenge and you retry it; progress is kept.
+  - **Work permit** — 30 minutes of LinkedIn for actual work. Requires a **flawless run**: lose any challenge and you're back to challenge one.
+- The prize is tiny on purpose. Two-plus minutes of effort for two minutes of feed — the math is the deterrent.
 - Counts your "feeds dodged" so you can watch the number grow.
 
 ## Install (2 minutes)

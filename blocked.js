@@ -82,7 +82,7 @@ async function storageSet(obj) {
 }
 
 async function init() {
-  const state = await storageGet({ giphyKey: "", blocksDodged: 0, msgIndex: 0 });
+  const state = await storageGet({ giphyKey: "", blocksDodged: 0, msgIndex: 0, nextGif: "" });
 
   // count the dodge
   const dodged = state.blocksDodged + 1;
@@ -99,35 +99,66 @@ async function init() {
   $("critter").textContent = CRITTERS[Math.floor(Math.random() * CRITTERS.length)];
   $("gifCaption").textContent = `scenic overlook nº ${((dodged - 1) % 12) + 1}`;
 
-  loadTrailCam(state.giphyKey);
+  loadTrailCam(state);
 }
 
 // Wildlife cam: Giphy if a key is saved, otherwise keyless cat GIFs from
-// cataas.com. On any failure the CSS poster scene simply stays.
-async function loadTrailCam(giphyKey) {
-  let url = "";
+// cataas.com. The previous visit's GIF is cached as a data URL so it shows
+// instantly; a fresh one downloads in the background for next time.
+// On any failure the CSS poster scene simply stays.
+
+function showCamImage(src) {
+  const img = document.createElement("img");
+  img.alt = "trail cam";
+  img.src = src;
+  img.addEventListener("load", () => {
+    $("poster").innerHTML = "";
+    $("poster").appendChild(img);
+    $("gifCaption").textContent = CAM_CAPTIONS[Math.floor(Math.random() * CAM_CAPTIONS.length)];
+  });
+}
+
+async function resolveGifUrl(giphyKey) {
+  if (giphyKey) {
+    const term = GIPHY_TERMS[Math.floor(Math.random() * GIPHY_TERMS.length)];
+    const res = await fetch(
+      `https://api.giphy.com/v1/gifs/random?api_key=${encodeURIComponent(giphyKey)}&tag=${encodeURIComponent(term)}&rating=pg`
+    );
+    const json = await res.json();
+    return json?.data?.images?.downsized_medium?.url || json?.data?.images?.original?.url || "";
+  }
+  return "https://cataas.com/cat/gif?width=640&ts=" + Date.now();
+}
+
+async function loadTrailCam(state) {
   try {
-    if (giphyKey) {
-      const term = GIPHY_TERMS[Math.floor(Math.random() * GIPHY_TERMS.length)];
-      const res = await fetch(
-        `https://api.giphy.com/v1/gifs/random?api_key=${encodeURIComponent(giphyKey)}&tag=${encodeURIComponent(term)}&rating=pg`
-      );
-      const json = await res.json();
-      url = json?.data?.images?.downsized_medium?.url || json?.data?.images?.original?.url || "";
+    if (state.nextGif) {
+      showCamImage(state.nextGif); // instant, from cache
     } else {
-      url = "https://cataas.com/cat/gif?ts=" + Date.now();
+      const url = await resolveGifUrl(state.giphyKey);
+      if (url) showCamImage(url); // first visit: live load
     }
-    if (!url) return;
-    const img = document.createElement("img");
-    img.alt = "trail cam";
-    img.src = url;
-    img.addEventListener("load", () => {
-      $("poster").innerHTML = "";
-      $("poster").appendChild(img);
-      $("gifCaption").textContent = CAM_CAPTIONS[Math.floor(Math.random() * CAM_CAPTIONS.length)];
-    });
   } catch (_) {
     /* poster scene stays */
+  }
+  prefetchNextGif(state.giphyKey);
+}
+
+async function prefetchNextGif(giphyKey) {
+  if (!ext) return;
+  try {
+    const url = await resolveGifUrl(giphyKey);
+    if (!url) return;
+    const blob = await (await fetch(url)).blob();
+    if (blob.size > 4 * 1024 * 1024) return; // keep chrome.storage under quota
+    const dataUrl = await new Promise((resolve) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.readAsDataURL(blob);
+    });
+    await storageSet({ nextGif: dataUrl });
+  } catch (_) {
+    /* next visit falls back to a live load */
   }
 }
 
@@ -143,11 +174,15 @@ const GAME_NAMES = {
 
 const GAME_HOWTO = {
   typing: "Type the posted sentence perfectly. One wrong character resets it.",
-  memory: "Find all 8 matching pairs in 12 tries.",
-  reaction: "A duck pops up somewhere in the field. Click it within 0.85 seconds. Seven ducks, no misses."
+  memory: "Find all 8 matching pairs in 20 tries.",
+  reaction: "A duck pops up somewhere in the field. Click it within 1.25 seconds. Five ducks."
 };
 
-let pending = null; // { domain, minutes }
+// Two tiers of stakes:
+//  - Day pass (2 min): beat all three; losing a challenge just retries it.
+//  - Work permit (30 min): beat all three WITHOUT a single loss; any slip
+//    resets to challenge one in a fresh order.
+let pending = null; // { domain, minutes, strict }
 let order = [];
 let step = 0;
 
@@ -169,8 +204,8 @@ function showReady() {
   start.focus();
 }
 
-function openGate(domain, minutes) {
-  pending = { domain, minutes };
+function openGate(domain, minutes, strict) {
+  pending = { domain, minutes, strict };
   order = TouchGrassGames.shuffle(TouchGrassGames.keys);
   step = 0;
   $("overlay").classList.remove("hidden");
@@ -179,9 +214,13 @@ function openGate(domain, minutes) {
 
 function lost() {
   const arena = $("gameArena");
-  arena.innerHTML = `<div class="result lose">Back to challenge one<span class="sub">All three, in a row. Or walk away with the whole afternoon.</span></div>`;
-  order = TouchGrassGames.shuffle(TouchGrassGames.keys);
-  step = 0;
+  if (pending.strict) {
+    arena.innerHTML = `<div class="result lose">Back to challenge one<span class="sub">Work permits require a flawless run. All three, no misses.</span></div>`;
+    order = TouchGrassGames.shuffle(TouchGrassGames.keys);
+    step = 0;
+  } else {
+    arena.innerHTML = `<div class="result lose">Try that one again<span class="sub">Progress kept. Or walk away with the whole afternoon.</span></div>`;
+  }
   setTimeout(showReady, 1500);
 }
 
@@ -213,11 +252,11 @@ async function grandWin() {
 }
 
 const siteName = (blockedSite || "this site").replace(/^www\./, "");
-$("btnPause").textContent = `Day pass: ${siteName} · ${UNLOCK_MINUTES} min · beat 3 challenges`;
-$("btnLinkedin").textContent = `Work permit: linkedin.com · ${LINKEDIN_MINUTES} min · beat 3 challenges`;
+$("btnPause").textContent = `Day pass: ${siteName} · ${UNLOCK_MINUTES} min · beat all 3 challenges`;
+$("btnLinkedin").textContent = `Work permit: linkedin.com · ${LINKEDIN_MINUTES} min · beat all 3 without a single loss`;
 
-$("btnPause").addEventListener("click", () => openGate(blockedSite || "unknown", UNLOCK_MINUTES));
-$("btnLinkedin").addEventListener("click", () => openGate("linkedin.com", LINKEDIN_MINUTES));
+$("btnPause").addEventListener("click", () => openGate(blockedSite || "unknown", UNLOCK_MINUTES, false));
+$("btnLinkedin").addEventListener("click", () => openGate("linkedin.com", LINKEDIN_MINUTES, true));
 
 $("gameQuit").addEventListener("click", () => {
   $("overlay").classList.add("hidden");
