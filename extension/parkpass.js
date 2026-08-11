@@ -23,7 +23,7 @@ export const DEFAULT_CONFIG = {
 export const MAX_SITES = 30;
 export const MAX_THEME_TERMS = 5;
 
-const THEME_PRESETS = ["cats", "dogs", "nature", "custom"];
+const THEME_PRESETS = ["cats", "dogs", "nature", "funny", "custom"];
 const PREFIX = "TGP1.";
 
 /** "https://www.Facebook.com/feed" → "facebook.com". "" if not a domain. */

@@ -3,7 +3,7 @@
 // NextDNS keys are stored separately (tg-nextdns-v1, slice 4) and NEVER
 // appear in this object, so pass codes can't leak them.
 
-export type ThemePreset = "cats" | "dogs" | "nature" | "custom";
+export type ThemePreset = "cats" | "dogs" | "nature" | "funny" | "custom";
 
 export interface ParkConfig {
   v: 1;
@@ -34,7 +34,7 @@ export const WORK_PERMIT_CHOICES = [15, 30, 45, 60] as const;
 export const MAX_SITES = 30;
 export const MAX_THEME_TERMS = 5;
 
-const THEME_PRESETS: readonly ThemePreset[] = ["cats", "dogs", "nature", "custom"];
+const THEME_PRESETS: readonly ThemePreset[] = ["cats", "dogs", "nature", "funny", "custom"];
 const KEY = "tg-config-v1";
 
 /** "https://www.Facebook.com/feed" → "facebook.com". "" if not a domain. */

@@ -153,6 +153,7 @@ const THEME_OPTIONS: { preset: ThemePreset; title: string; blurb: string }[] = [
   { preset: "cats", title: "Cats", blurb: "resident mousers, no key needed" },
   { preset: "dogs", title: "Dogs", blurb: "the rangers' good boys" },
   { preset: "nature", title: "Nature", blurb: "rivers, ridgelines, golden hour" },
+  { preset: "funny", title: "Funny", blurb: "fails, bloopers, wait-for-it" },
   { preset: "custom", title: "Custom", blurb: "your own search terms" },
 ];
 

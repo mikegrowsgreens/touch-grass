@@ -4,6 +4,7 @@
 const THEME_TERMS: Record<string, string[]> = {
   dogs: ["funny dog", "puppy", "dog party", "good dog", "dog zoomies"],
   nature: ["nature", "forest", "mountain river", "sunrise timelapse", "ocean waves", "wildlife"],
+  funny: ["fail", "blooper", "funny animals", "wait for it", "laughing"],
 };
 
 export async function GET(request: Request) {
