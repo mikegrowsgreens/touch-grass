@@ -2,7 +2,7 @@
 // for pages with a cached fallback, so the park (poster scene included)
 // renders with no connection.
 
-const CACHE = "tg-shell-v2";
+const CACHE = "tg-shell-v3";
 const SHELL = ["/", "/shortcuts", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -25,6 +25,7 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return; // trail cam etc: network only
+  if (url.pathname.startsWith("/api/")) return; // gif + nextdns: live data, never cached
 
   if (req.mode === "navigate") {
     event.respondWith(
