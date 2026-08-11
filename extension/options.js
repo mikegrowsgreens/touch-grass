@@ -22,7 +22,9 @@ async function currentConfig() {
 
 async function saveConfig(cfg) {
   const clean = sanitizeConfig(cfg);
-  await chrome.storage.local.set({ parkConfig: clean, blocklist: clean.sites });
+  // nextGif was prefetched under the OLD theme — drop it so the next
+  // blocked page live-loads the new one instead of lagging a visit behind.
+  await chrome.storage.local.set({ parkConfig: clean, blocklist: clean.sites, nextGif: "" });
   chrome.runtime.sendMessage({ type: "rebuild" });
   return clean;
 }
@@ -47,7 +49,11 @@ async function load() {
     .filter(([, until]) => until > now)
     .map(([d, until]) => `${d} unlocked until ${new Date(until).toLocaleTimeString()}`);
   const pause = active.length ? ` · ${active.join(" · ")}` : "";
-  $("stats").textContent = `Feeds dodged so far: ${s.blocksDodged}${pause}`;
+  const theme =
+    cfg.theme.preset === "custom"
+      ? `custom (${(cfg.theme.terms ?? []).join(", ")})`
+      : cfg.theme.preset;
+  $("stats").textContent = `Feeds dodged so far: ${s.blocksDodged} · trail cam: ${theme}${pause}`;
 }
 
 // Key persists as soon as it's pasted — losing it to a missed Save click
