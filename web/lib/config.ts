@@ -31,7 +31,7 @@ export const DEFAULT_CONFIG: ParkConfig = {
 
 export const DAY_PASS_CHOICES = [1, 2, 5, 10] as const;
 export const WORK_PERMIT_CHOICES = [15, 30, 45, 60] as const;
-export const MAX_SITES = 20;
+export const MAX_SITES = 30;
 export const MAX_THEME_TERMS = 5;
 
 const THEME_PRESETS: readonly ThemePreset[] = ["cats", "dogs", "nature", "custom"];

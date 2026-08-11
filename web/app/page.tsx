@@ -115,8 +115,8 @@ export default function Park() {
             <div>
               {cfg.sites.map((site) => (
                 <div key={site} className="pass-row">
-                  <span className="font-bold text-[15px]">{site}</span>
-                  <span className="flex gap-2">
+                  <span className="font-bold text-[15px] break-all">{site}</span>
+                  <span className="flex flex-wrap justify-end gap-2">
                     <button
                       className="pass-btn"
                       onClick={() =>

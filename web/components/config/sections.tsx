@@ -14,20 +14,40 @@ import {
   type ThemePreset,
 } from "@/lib/config";
 
-const PRESET_SITES = [
-  "facebook.com",
-  "instagram.com",
-  "threads.net",
-  "tiktok.com",
-  "x.com",
-  "reddit.com",
-  "youtube.com",
-  "linkedin.com",
-  "strava.com",
-  "snapchat.com",
-  "pinterest.com",
-  "twitch.tv",
+const PRESET_GROUPS: { label: string; sites: string[] }[] = [
+  {
+    label: "Social feeds",
+    sites: [
+      "facebook.com",
+      "instagram.com",
+      "threads.net",
+      "tiktok.com",
+      "x.com",
+      "reddit.com",
+      "youtube.com",
+      "linkedin.com",
+      "strava.com",
+      "snapchat.com",
+      "pinterest.com",
+      "twitch.tv",
+    ],
+  },
+  {
+    label: "News & rabbit holes",
+    sites: [
+      "news.google.com",
+      "apnews.com",
+      "cnn.com",
+      "foxnews.com",
+      "nytimes.com",
+      "news.ycombinator.com",
+      "espn.com",
+      "bleacherreport.com",
+    ],
+  },
 ];
+
+const PRESET_SITES = PRESET_GROUPS.flatMap((g) => g.sites);
 
 export function SitesPicker({
   sites,
@@ -62,23 +82,46 @@ export function SitesPicker({
   return (
     <section>
       <span className="field-label">Trail closures — sites the park replaces</span>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {[...PRESET_SITES, ...extras].map((domain) => (
-          <button
-            key={domain}
-            type="button"
-            className="chip"
-            aria-pressed={sites.includes(domain)}
-            onClick={() => toggle(domain)}
-          >
-            {domain}
-          </button>
-        ))}
-      </div>
+      {PRESET_GROUPS.map((group) => (
+        <div key={group.label} className="mb-4">
+          <span className="caps-label block mb-2">{group.label}</span>
+          <div className="flex flex-wrap gap-2">
+            {group.sites.map((domain) => (
+              <button
+                key={domain}
+                type="button"
+                className="chip"
+                aria-pressed={sites.includes(domain)}
+                onClick={() => toggle(domain)}
+              >
+                {domain}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+      {extras.length > 0 && (
+        <div className="mb-4">
+          <span className="caps-label block mb-2">Your closures</span>
+          <div className="flex flex-wrap gap-2">
+            {extras.map((domain) => (
+              <button
+                key={domain}
+                type="button"
+                className="chip"
+                aria-pressed={sites.includes(domain)}
+                onClick={() => toggle(domain)}
+              >
+                {domain}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="flex gap-2">
         <input
           className="field"
-          placeholder="another-site.com"
+          placeholder="anything-distracting.com"
           value={customDraft}
           onChange={(e) => setCustomDraft(e.target.value)}
           onKeyDown={(e) => {

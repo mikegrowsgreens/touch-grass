@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG = {
   theme: { preset: "cats" },
 };
 
-export const MAX_SITES = 20;
+export const MAX_SITES = 30;
 export const MAX_THEME_TERMS = 5;
 
 const THEME_PRESETS = ["cats", "dogs", "nature", "custom"];
