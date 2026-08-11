@@ -13,7 +13,6 @@ import {
   type ParkConfig,
 } from "@/lib/config";
 import { useHydrated } from "@/lib/useHydrated";
-import { decodePass, encodePass } from "@/lib/parkpass";
 import { PassRules, SitesPicker, ThemePicker } from "@/components/config/sections";
 import { RangerRadio } from "@/components/config/nextdns";
 import {
@@ -29,9 +28,6 @@ export default function Settings() {
   const router = useRouter();
   const hydrated = useHydrated();
   const [draft, setDraft] = useState<ParkConfig | null>(null);
-  const [importDraft, setImportDraft] = useState("");
-  const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const [copied, setCopied] = useState(false);
 
   // null = untouched this session (read storage); "" = explicitly unlinked.
   const [syncOverride, setSyncOverride] = useState<string | null>(null);
@@ -42,7 +38,6 @@ export default function Settings() {
   // Draft starts from stored config once hydrated; no setState-in-effect.
   const cfg = draft ?? (hydrated ? loadConfig() ?? DEFAULT_CONFIG : DEFAULT_CONFIG);
   const patch = (p: Partial<ParkConfig>) => setDraft({ ...cfg, ...p });
-  const passCode = hydrated ? encodePass(cfg) : "";
 
   const syncId = syncOverride !== null ? syncOverride || null : hydrated ? (loadSyncState()?.id ?? null) : null;
 
@@ -95,35 +90,6 @@ export default function Settings() {
     }
   };
 
-  const copyPass = async () => {
-    try {
-      await navigator.clipboard.writeText(passCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* clipboard blocked — the code is selectable below */
-    }
-  };
-
-  const applyImport = () => {
-    const decoded = decodePass(importDraft);
-    if (!decoded) {
-      setImportMsg({
-        ok: false,
-        text: "That's not a valid park pass — check you copied the whole code.",
-      });
-      return;
-    }
-    const clean = saveConfig(decoded);
-    void pushConfig(clean);
-    setDraft(clean);
-    setImportDraft("");
-    setImportMsg({
-      ok: true,
-      text: `Pass accepted — ${clean.sites.length} closure${clean.sites.length === 1 ? "" : "s"}, ${clean.theme.preset} trail cam.`,
-    });
-  };
-
   return (
     <main className="min-h-screen flex items-start justify-center px-4 py-8">
       <div className="sign">
@@ -138,53 +104,6 @@ export default function Settings() {
           <div className="dashed-rule pt-5">
             <RangerRadio sites={cfg.sites} />
           </div>
-
-          <section className="dashed-rule pt-5">
-            <span className="field-label">Share your park — pass code</span>
-            <p className="text-[13px] mb-2" style={{ color: "var(--faded)" }}>
-              Carries your closures, theme, and pass rules to another device or a
-              friend. Never contains keys or personal data. Unsaved edits count —
-              save to make them stick on this device.
-            </p>
-            <div className="field pass-code mb-2" style={{ background: "var(--cream-dark)" }}>
-              {passCode || "…"}
-            </div>
-            <button type="button" className="chip" onClick={copyPass}>
-              {copied ? "copied ✓" : "copy code"}
-            </button>
-          </section>
-
-          <section>
-            <span className="field-label">Redeem a pass code</span>
-            <textarea
-              className="field pass-code"
-              rows={3}
-              placeholder="TGP1.…"
-              value={importDraft}
-              onChange={(e) => {
-                setImportDraft(e.target.value);
-                setImportMsg(null);
-              }}
-            />
-            <div className="flex items-center gap-3 mt-2">
-              <button
-                type="button"
-                className="chip"
-                onClick={applyImport}
-                disabled={!importDraft.trim()}
-              >
-                redeem
-              </button>
-              {importMsg && (
-                <p
-                  className="text-[13px]"
-                  style={{ color: importMsg.ok ? "var(--pine)" : "var(--rust)" }}
-                >
-                  {importMsg.text}
-                </p>
-              )}
-            </div>
-          </section>
 
           <section className="dashed-rule pt-5">
             <span className="field-label">Park sync — one park, every device</span>
@@ -210,9 +129,9 @@ export default function Settings() {
             ) : (
               <>
                 <p className="text-[13px] mb-2" style={{ color: "var(--faded)" }}>
-                  Tired of ferrying pass codes? Turn on sync here, then paste the
-                  sync code once on each other device (and the extension) — every
-                  save follows automatically after that.
+                  Turn on sync here, then paste the sync code once on each other
+                  device (and the extension) — every save follows automatically
+                  after that. Keys never sync.
                 </p>
                 <button type="button" className="chip mb-3" onClick={startSync}>
                   turn on sync

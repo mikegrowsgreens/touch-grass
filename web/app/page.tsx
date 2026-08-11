@@ -169,7 +169,7 @@ export default function Park() {
             </p>
             <div className="flex justify-center gap-4 mt-3">
               <Link href="/settings" className="permit-link">
-                park office — rules, themes &amp; pass codes
+                park office — rules, themes &amp; sync
               </Link>
               <button type="button" className="permit-link" onClick={sharePark}>
                 {shared ? "link copied ✓" : "share the park"}
@@ -189,9 +189,6 @@ export default function Park() {
             <p className="caps-label text-center">
               passes · streaks · your own closures — 5 minutes
             </p>
-            <Link href="/settings" className="permit-link">
-              got a pass code from a friend? redeem it here
-            </Link>
           </div>
         )}
 
