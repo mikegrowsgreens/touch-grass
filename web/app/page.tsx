@@ -9,6 +9,7 @@ import { recordPass, recordVisit, streakDays, type ParkStats } from "@/lib/stats
 import { loadConfig } from "@/lib/config";
 import { loadCreds } from "@/lib/nextdns";
 import { reactivateExpired } from "@/lib/passes";
+import { pullConfig } from "@/lib/sync";
 import { useHydrated } from "@/lib/useHydrated";
 import { resolveCamUrl } from "@/lib/trailcam";
 
@@ -24,7 +25,12 @@ export default function Park() {
   const hydrated = useHydrated();
   const [freshStats, setFreshStats] = useState<ParkStats | null>(null);
   const stats = freshStats ?? (hydrated ? getVisitStats() : null);
-  const cfg = useMemo(() => (hydrated ? loadConfig() : null), [hydrated]);
+  const [cfgVersion, setCfgVersion] = useState(0);
+  const cfg = useMemo(
+    () => (hydrated ? loadConfig() : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- cfgVersion re-reads storage after a sync pull
+    [hydrated, cfgVersion],
+  );
   const [cam, setCam] = useState<{ src: string; caption: string } | null>(null);
   const [gate, setGate] = useState<GatePass | null>(null);
   const [shared, setShared] = useState(false);
@@ -65,6 +71,14 @@ export default function Park() {
     if (!hydrated) return;
     const creds = loadCreds();
     if (creds) void reactivateExpired(creds).catch(() => {});
+  }, [hydrated]);
+
+  // Park sync: adopt settings saved on other linked devices.
+  useEffect(() => {
+    if (!hydrated) return;
+    void pullConfig().then((applied) => {
+      if (applied) setCfgVersion((v) => v + 1);
+    });
   }, [hydrated]);
 
   useEffect(() => {

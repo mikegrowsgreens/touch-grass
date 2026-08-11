@@ -120,6 +120,10 @@ async function init() {
   $("gifCaption").textContent = `scenic overlook nº ${((dodged - 1) % 12) + 1}`;
 
   loadTrailCam(state);
+
+  // Park sync: fetch newer shared settings in the background — this visit
+  // renders from local state, the next one uses whatever arrived.
+  if (ext) ext.runtime.sendMessage({ type: "sync-pull" }, () => ext.runtime.lastError);
 }
 
 // Wildlife cam: Giphy if a key is saved, otherwise keyless cat GIFs from

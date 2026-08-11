@@ -3,6 +3,7 @@
 // of truth; blocklist stays as a mirror of parkConfig.sites because
 // background.js builds its rules from it (and rebuilds on its change).
 import { decodePass, encodePass, normalizeDomain, sanitizeConfig } from "./parkpass.js";
+import { clearSync, getSyncState, pullConfig, pushConfig, setSyncId } from "./sync.js";
 
 const DEFAULTS = {
   blocklist: ["facebook.com", "instagram.com", "threads.net", "linkedin.com", "strava.com"],
@@ -36,8 +37,14 @@ function flash(id) {
 }
 
 async function load() {
+  // Adopt newer synced settings before painting the form.
+  await pullConfig();
   const s = await chrome.storage.local.get(DEFAULTS);
   const cfg = await currentConfig();
+  const sync = await getSyncState();
+  $("syncCode").value = sync?.syncId ?? "";
+  $("syncStatus").textContent = sync ? "Following the shared park settings." : "";
+  $("syncStatus").className = "pass-status ok";
   $("domains").value = cfg.sites.join("\n");
   $("giphyKey").value = s.giphyKey;
   // The pass code IS the config — always show the current one, so the
@@ -77,6 +84,7 @@ $("save").addEventListener("click", async () => {
   const cfg = await currentConfig();
   const clean = await saveConfig({ ...cfg, sites });
   await chrome.storage.local.set({ giphyKey });
+  await pushConfig(clean);
   $("domains").value = clean.sites.join("\n");
   $("passCode").value = encodePass(clean);
   flash("saved");
@@ -103,11 +111,36 @@ $("passImport").addEventListener("click", async () => {
     return;
   }
   const clean = await saveConfig(cfg);
+  await pushConfig(clean);
   $("domains").value = clean.sites.join("\n");
   status.textContent =
     `Pass accepted — ${clean.sites.length} closed area${clean.sites.length === 1 ? "" : "s"}, ` +
     `${clean.dayPassMin} min day passes, ${clean.workPermit.min} min work permit on ${clean.workPermit.domain}.`;
   status.className = "pass-status ok";
+});
+
+$("syncLink").addEventListener("click", async () => {
+  const status = $("syncStatus");
+  if (!(await setSyncId($("syncCode").value))) {
+    status.textContent = "That doesn't look like a sync code (26 letters/numbers).";
+    status.className = "pass-status bad";
+    return;
+  }
+  const applied = await pullConfig();
+  if (!applied) await pushConfig(await currentConfig()); // empty frequency — claim it
+  await load();
+  status.textContent = applied
+    ? "Linked — adopted the shared park settings."
+    : "Linked — this park's settings now lead.";
+  status.className = "pass-status ok";
+  flash("syncSaved");
+});
+
+$("syncUnlink").addEventListener("click", async () => {
+  await clearSync();
+  $("syncCode").value = "";
+  $("syncStatus").textContent = "Unlinked — back to manual pass codes.";
+  $("syncStatus").className = "pass-status ok";
 });
 
 load();

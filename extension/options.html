@@ -137,6 +137,19 @@
       <p class="pass-status" id="passStatus"></p>
     </div>
 
+    <div class="pass-block">
+      <h2>Park sync</h2>
+      <p class="hint">Paste the sync code from the web park's office (Park sync → copy sync code) and this extension follows your app settings automatically — pulls on open and every 15 minutes.</p>
+      <label for="syncCode">Sync code</label>
+      <input id="syncCode" spellcheck="false" placeholder="26 letters and numbers" />
+      <div class="pass-row">
+        <button id="syncLink">Link</button>
+        <button id="syncUnlink" class="secondary">Unlink</button>
+        <span class="saved" id="syncSaved">Linked ✓</span>
+      </div>
+      <p class="pass-status" id="syncStatus"></p>
+    </div>
+
     <div class="stats" id="stats"></div>
   </div>
   <script type="module" src="options.js"></script>

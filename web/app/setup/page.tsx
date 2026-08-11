@@ -13,6 +13,7 @@ import {
   type ParkConfig,
 } from "@/lib/config";
 import { useHydrated } from "@/lib/useHydrated";
+import { pushConfig } from "@/lib/sync";
 import { PassRules, SitesPicker, ThemePicker } from "@/components/config/sections";
 import { RangerRadio } from "@/components/config/nextdns";
 import { HomeScreenGuide, PrivateDnsGuide } from "@/components/config/phone";
@@ -30,7 +31,7 @@ export default function Setup() {
   const patch = (p: Partial<ParkConfig>) => setDraft({ ...cfg, ...p });
 
   const finish = () => {
-    saveConfig(cfg);
+    void pushConfig(saveConfig(cfg));
     router.push("/");
   };
 

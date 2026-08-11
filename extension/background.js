@@ -2,6 +2,10 @@
 // Builds declarativeNetRequest redirect rules from the stored block list.
 // Winning the game gauntlet lifts the rule for ONE domain, briefly.
 
+import { pullConfig } from "./sync.js";
+
+const SYNC_ALARM = "sync-pull";
+
 const DEFAULT_BLOCKLIST = [
   "facebook.com",
   "instagram.com",
@@ -73,12 +77,22 @@ async function pauseDomain(domain, minutes) {
 chrome.runtime.onInstalled.addListener(async () => {
   const { blocklist } = await chrome.storage.local.get("blocklist");
   if (!blocklist) await chrome.storage.local.set({ blocklist: DEFAULT_BLOCKLIST });
+  chrome.alarms.create(SYNC_ALARM, { periodInMinutes: 15 });
+  await pullConfig(); // blocklist change (if any) triggers its own rebuild
   await rebuildRules();
 });
 
-chrome.runtime.onStartup.addListener(rebuildRules);
+chrome.runtime.onStartup.addListener(async () => {
+  chrome.alarms.create(SYNC_ALARM, { periodInMinutes: 15 });
+  await pullConfig();
+  await rebuildRules();
+});
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (alarm.name === SYNC_ALARM) {
+    await pullConfig(); // storage.onChanged rebuilds rules when sites changed
+    return;
+  }
   if (!alarm.name.startsWith(ALARM_PREFIX)) return;
   const domain = alarm.name.slice(ALARM_PREFIX.length);
   const { pauses } = await getState();
@@ -99,6 +113,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
   if (msg && msg.type === "rebuild") {
     rebuildRules().then(() => sendResponse({ ok: true }));
+    return true;
+  }
+  if (msg && msg.type === "sync-pull") {
+    pullConfig().then((applied) => sendResponse({ applied: !!applied }));
     return true;
   }
 });
