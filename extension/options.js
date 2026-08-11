@@ -38,6 +38,9 @@ async function load() {
   const cfg = await currentConfig();
   $("domains").value = cfg.sites.join("\n");
   $("giphyKey").value = s.giphyKey;
+  // The pass code IS the config — always show the current one, so the
+  // extension is its own backup (no keeping TGP1 strings in notes).
+  $("passCode").value = encodePass(cfg);
 
   const now = Date.now();
   const active = Object.entries(s.pauses)
@@ -69,6 +72,7 @@ $("save").addEventListener("click", async () => {
   const clean = await saveConfig({ ...cfg, sites });
   await chrome.storage.local.set({ giphyKey });
   $("domains").value = clean.sites.join("\n");
+  $("passCode").value = encodePass(clean);
   flash("saved");
 });
 
