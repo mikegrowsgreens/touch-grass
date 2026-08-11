@@ -47,6 +47,17 @@ async function load() {
   $("stats").textContent = `Feeds dodged so far: ${s.blocksDodged}${pause}`;
 }
 
+// Key persists as soon as it's pasted — losing it to a missed Save click
+// (or a closed tab) means re-hunting it from notes.
+let keyTimer;
+$("giphyKey").addEventListener("input", () => {
+  clearTimeout(keyTimer);
+  keyTimer = setTimeout(
+    () => chrome.storage.local.set({ giphyKey: $("giphyKey").value.trim() }),
+    400
+  );
+});
+
 $("save").addEventListener("click", async () => {
   const sites = $("domains")
     .value.split("\n")
