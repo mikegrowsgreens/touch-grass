@@ -149,7 +149,10 @@ async function resolveGifUrl(giphyKey) {
       `https://api.giphy.com/v1/gifs/random?api_key=${encodeURIComponent(giphyKey)}&tag=${encodeURIComponent(term)}&rating=pg`
     );
     const json = await res.json();
-    return json?.data?.images?.downsized_medium?.url || json?.data?.images?.original?.url || "";
+    // smallest full-size rendition first — downsized caps ~2MB, so the page
+    // paints fast and the prefetch cache (4MB guard) almost always stores it
+    const imgs = json?.data?.images;
+    return imgs?.downsized?.url || imgs?.downsized_medium?.url || imgs?.original?.url || "";
   }
   // cats theme, no key, or no pool — resident mousers cover every shortage
   return "https://cataas.com/cat/gif?width=640&ts=" + Date.now();
@@ -301,8 +304,8 @@ $("gameQuit").addEventListener("click", () => {
 
 $("btnLeave").addEventListener("click", () => {
   window.close();
-  // typed-URL tabs can't self-close; go somewhere harmless instead
-  setTimeout(() => (location.href = "https://www.google.com"), 150);
+  // typed-URL tabs can't self-close; the trail leads to the park itself
+  setTimeout(() => (location.href = "https://touchgrass.mikegrowsgreens.com"), 150);
 });
 
 init();
