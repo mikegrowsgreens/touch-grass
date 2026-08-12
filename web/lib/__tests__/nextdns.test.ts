@@ -4,8 +4,10 @@ import {
   buildDenylist,
   getDenylist,
   normalizeProfileId,
+  reconcileDenylist,
   sanitizeCreds,
   setActive,
+  unlockDomain,
   type NextDnsCreds,
 } from "../nextdns";
 import { buildRelockJob, scheduleRelock, RELOCK_WEBHOOK } from "../relock";
@@ -116,6 +118,65 @@ describe("setActive", () => {
     expect(url).toBe("/api/nextdns/profiles/ab12cd/denylist/instagram.com");
     expect(init.method).toBe("PATCH");
     expect(JSON.parse(init.body)).toEqual({ active: false });
+  });
+});
+
+describe("unlockDomain", () => {
+  it("PATCHes when the entry exists", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(null, 204));
+    await unlockDomain(CREDS, "instagram.com");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("self-heals a missing entry by creating it unlocked", async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ error: "nope" }, 404))
+      .mockResolvedValueOnce(jsonResponse(null, 204));
+    await unlockDomain(CREDS, "news.google.com");
+    const [url, init] = fetchMock.mock.calls[1];
+    expect(url).toBe("/api/nextdns/profiles/ab12cd/denylist");
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body)).toEqual({ id: "news.google.com", active: false });
+  });
+
+  it("rethrows non-404 failures", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ error: "denied" }, 403));
+    await expect(unlockDomain(CREDS, "instagram.com")).rejects.toThrow("rejected the API key");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("reconcileDenylist", () => {
+  it("adds missing sites and removes unconfigured entries, keeps live passes", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          data: [
+            { id: "facebook.com", active: false }, // mid-pass — must stay untouched
+            { id: "oldsite.com", active: true }, // dropped from config — must go
+          ],
+        }),
+      )
+      .mockResolvedValue(jsonResponse(null, 204));
+    const r = await reconcileDenylist(CREDS, ["facebook.com", "news.google.com"]);
+    expect(r).toEqual({ added: ["news.google.com"], removed: ["oldsite.com"] });
+    // 1 GET + 1 POST + 1 DELETE
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const [postUrl, postInit] = fetchMock.mock.calls[1];
+    expect(postUrl).toBe("/api/nextdns/profiles/ab12cd/denylist");
+    expect(JSON.parse(postInit.body)).toEqual({ id: "news.google.com", active: true });
+    const [delUrl, delInit] = fetchMock.mock.calls[2];
+    expect(delUrl).toBe("/api/nextdns/profiles/ab12cd/denylist/oldsite.com");
+    expect(delInit.method).toBe("DELETE");
+  });
+
+  it("no-ops when denylist already matches", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ data: [{ id: "facebook.com", active: true }] }),
+    );
+    const r = await reconcileDenylist(CREDS, ["facebook.com"]);
+    expect(r).toEqual({ added: [], removed: [] });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 

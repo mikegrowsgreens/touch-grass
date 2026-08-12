@@ -15,6 +15,7 @@ import {
 import { useHydrated } from "@/lib/useHydrated";
 import { PassRules, SitesPicker, ThemePicker } from "@/components/config/sections";
 import { RangerRadio } from "@/components/config/nextdns";
+import { loadCreds, reconcileDenylist } from "@/lib/nextdns";
 import {
   clearSyncState,
   createSync,
@@ -52,6 +53,8 @@ export default function Settings() {
   const save = () => {
     const clean = saveConfig(cfg);
     void pushConfig(clean);
+    const creds = loadCreds();
+    if (creds) void reconcileDenylist(creds, clean.sites).catch(() => {});
     router.push("/");
   };
 

@@ -7,7 +7,7 @@ import { MESSAGES, SUBMESSAGES, CAM_CAPTIONS, CRITTERS } from "@/lib/messages";
 import Gauntlet, { type GatePass } from "@/components/Gauntlet";
 import { recordPass, recordVisit, streakDays, type ParkStats } from "@/lib/stats";
 import { loadConfig } from "@/lib/config";
-import { loadCreds } from "@/lib/nextdns";
+import { loadCreds, reconcileDenylist } from "@/lib/nextdns";
 import { reactivateExpired } from "@/lib/passes";
 import { pullConfig } from "@/lib/sync";
 import { useHydrated } from "@/lib/useHydrated";
@@ -73,12 +73,19 @@ export default function Park() {
     if (creds) void reactivateExpired(creds).catch(() => {});
   }, [hydrated]);
 
-  // Park sync: adopt settings saved on other linked devices.
+  // Park sync: adopt settings saved on other linked devices, then make the
+  // NextDNS denylist match the (possibly fresh) closure list — sites added
+  // anywhere start blocking here without a manual "build my denylist".
   useEffect(() => {
     if (!hydrated) return;
-    void pullConfig().then((applied) => {
-      if (applied) setCfgVersion((v) => v + 1);
-    });
+    void pullConfig()
+      .then((applied) => {
+        if (applied) setCfgVersion((v) => v + 1);
+        const creds = loadCreds();
+        const sites = (applied ?? loadConfig())?.sites;
+        if (creds && sites?.length) void reconcileDenylist(creds, sites).catch(() => {});
+      })
+      .catch(() => {});
   }, [hydrated]);
 
   useEffect(() => {

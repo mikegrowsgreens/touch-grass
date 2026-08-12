@@ -63,7 +63,7 @@ export function clearCreds(): void {
 
 async function call(
   creds: NextDnsCreds,
-  method: "GET" | "POST" | "PATCH",
+  method: "GET" | "POST" | "PATCH" | "DELETE",
   path: string,
   body?: unknown,
 ): Promise<unknown> {
@@ -135,4 +135,48 @@ export async function setActive(
   active: boolean,
 ): Promise<void> {
   await call(creds, "PATCH", `denylist/${encodeURIComponent(domain)}`, { active });
+}
+
+/**
+ * Unlock for a pass, self-healing: when the domain was never pushed to the
+ * denylist (added in the app after setup), the PATCH 404s — create the entry
+ * unlocked instead. The relock later flips it active and the denylist has
+ * quietly repaired itself.
+ */
+export async function unlockDomain(creds: NextDnsCreds, domain: string): Promise<void> {
+  try {
+    await setActive(creds, domain, false);
+  } catch (e) {
+    if (!(e instanceof Error) || !e.message.includes("not found")) throw e;
+    await call(creds, "POST", "denylist", { id: domain, active: false });
+  }
+}
+
+/**
+ * Keep the profile's denylist in lockstep with the configured sites: add
+ * what's missing, drop what's no longer configured. Existing entries keep
+ * their active state (an in-flight pass survives a reconcile). Treats the
+ * denylist as Touch-Grass-owned — hand-added entries for unconfigured
+ * domains get removed.
+ */
+export async function reconcileDenylist(
+  creds: NextDnsCreds,
+  sites: string[],
+): Promise<{ added: string[]; removed: string[] }> {
+  const want = new Set(sites);
+  const current = await getDenylist(creds);
+  const have = new Set(current.map((e) => e.id));
+  const added: string[] = [];
+  const removed: string[] = [];
+  for (const site of sites) {
+    if (have.has(site)) continue;
+    await call(creds, "POST", "denylist", { id: site, active: true });
+    added.push(site);
+  }
+  for (const entry of current) {
+    if (want.has(entry.id)) continue;
+    await call(creds, "DELETE", `denylist/${encodeURIComponent(entry.id)}`);
+    removed.push(entry.id);
+  }
+  return { added, removed };
 }

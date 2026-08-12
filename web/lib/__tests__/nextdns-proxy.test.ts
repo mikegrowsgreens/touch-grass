@@ -2,7 +2,7 @@
 // over Web Request/Response, so we call them directly with a mocked fetch.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GET, PATCH, POST } from "../../app/api/nextdns/[...path]/route";
+import { DELETE, GET, PATCH, POST } from "../../app/api/nextdns/[...path]/route";
 import { KEY_HEADER } from "../nextdns";
 import { reactivateExpired } from "../passes";
 
@@ -50,6 +50,22 @@ describe("nextdns proxy", () => {
     );
     expect(res.status).toBe(204);
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ active: true });
+  });
+
+  it("forwards DELETE for a denylist entry, no body needed", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+    const res = await DELETE(req("DELETE"), ctx("profiles", "ab12cd", "denylist", "oldsite.com"));
+    expect(res.status).toBe(204);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://api.nextdns.io/profiles/ab12cd/denylist/oldsite.com");
+    expect(init.method).toBe("DELETE");
+    expect(init.body).toBeUndefined();
+  });
+
+  it("404s DELETE on the denylist root (whole-list wipe not allowed)", async () => {
+    const res = await DELETE(req("DELETE"), ctx("profiles", "ab12cd", "denylist"));
+    expect(res.status).toBe(404);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("401s without a key", async () => {

@@ -16,7 +16,7 @@ import {
   newGauntlet,
   type GauntletState,
 } from "@/lib/gauntlet";
-import { loadCreds, setActive } from "@/lib/nextdns";
+import { loadCreds, unlockDomain } from "@/lib/nextdns";
 import { recordUnlock } from "@/lib/passes";
 import { scheduleRelock } from "@/lib/relock";
 
@@ -88,7 +88,7 @@ export default function Gauntlet({
     if (!creds) return; // radio stays "honorary"
     setRadio({ state: "calling" });
     try {
-      await setActive(creds, pass.domain, false);
+      await unlockDomain(creds, pass.domain);
       const relockAt = Date.now() + pass.minutes * 60_000;
       recordUnlock(pass.domain, relockAt);
       void scheduleRelock(creds, pass.domain, relockAt); // fallback covers a miss
@@ -210,13 +210,14 @@ export default function Gauntlet({
                     hour: "numeric",
                     minute: "2-digit",
                   })}
-                  . New DNS can take a minute to reach the phone.
+                  . Your phone remembers the closed gate for a few minutes (DNS
+                  cache) — if the trail still looks shut, wait a beat and reload.
                 </span>
               )}
               {radio.state === "failed" && (
                 <span className="sub">
-                  Radio trouble ({radio.why}) — the trail stayed closed. Check the park
-                  office: is {pass.domain} on your denylist?
+                  Radio trouble ({radio.why}) — the trail stayed closed. Check the
+                  ranger radio connection in the park office and try another pass.
                 </span>
               )}
               <a

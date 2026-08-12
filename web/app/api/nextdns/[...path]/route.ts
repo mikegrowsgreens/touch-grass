@@ -16,6 +16,7 @@ const METHOD_FOR_PATH = {
   GET: /denylist$/, // list
   POST: /denylist$/, // add entry
   PATCH: new RegExp(`denylist\\/${DOMAIN}$`), // toggle entry
+  DELETE: new RegExp(`denylist\\/${DOMAIN}$`), // remove entry (site dropped from config)
 } as const;
 
 async function proxy(
@@ -35,7 +36,7 @@ async function proxy(
   }
 
   let body: string | undefined;
-  if (method !== "GET") {
+  if (method === "POST" || method === "PATCH") {
     try {
       const json = await request.json();
       // Only the two write shapes NextDNS needs ever pass through.
@@ -74,6 +75,10 @@ export async function GET(request: Request, ctx: { params: Promise<{ path: strin
 
 export async function POST(request: Request, ctx: { params: Promise<{ path: string[] }> }) {
   return proxy(request, ctx, "POST");
+}
+
+export async function DELETE(request: Request, ctx: { params: Promise<{ path: string[] }> }) {
+  return proxy(request, ctx, "DELETE");
 }
 
 export async function PATCH(request: Request, ctx: { params: Promise<{ path: string[] }> }) {
