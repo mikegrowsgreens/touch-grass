@@ -11,8 +11,10 @@ export function detectPlatform(ua: string, maxTouchPoints = 0): Platform {
   return "other";
 }
 
-/** Default guide tab: "other" (desktop) readers most often set up an iPhone or
- *  Android second-hand, so fall back to android — the native-settings path. */
-export function defaultTab(p: Platform): "android" | "ios" {
-  return p === "ios" ? "ios" : "android";
+/** Default guide tab straight from the platform — desktop readers land on the
+ *  computer guide (guides without one clamp to android themselves). */
+export function defaultTab(p: Platform): "android" | "ios" | "computer" {
+  if (p === "ios") return "ios";
+  if (p === "android") return "android";
+  return "computer";
 }

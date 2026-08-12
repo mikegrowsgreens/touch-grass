@@ -18,7 +18,7 @@ import { PassRules, SitesPicker, ThemePicker } from "@/components/config/section
 import { RangerRadio } from "@/components/config/nextdns";
 import { HomeScreenGuide, PrivateDnsGuide } from "@/components/config/phone";
 
-const STEPS = ["Closures", "Trail cam", "Passes", "Radio", "Phone", "Home screen"] as const;
+const STEPS = ["Closures", "Trail cam", "Passes", "Radio", "Devices", "Home screen"] as const;
 
 export default function Setup() {
   const router = useRouter();
@@ -109,7 +109,7 @@ export default function Setup() {
 
         {step === 4 && (
           <>
-            <p className="notice mb-5">Close the trails on the phone itself</p>
+            <p className="notice mb-5">Close the trails on the device itself</p>
             <PrivateDnsGuide />
           </>
         )}

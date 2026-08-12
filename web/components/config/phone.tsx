@@ -10,23 +10,36 @@ import { loadCreds } from "@/lib/nextdns";
 import { defaultTab, detectPlatform } from "@/lib/platform";
 import { useHydrated } from "@/lib/useHydrated";
 
-type Tab = "android" | "ios";
+type Tab = "android" | "ios" | "computer";
 
-function usePlatformTab(): [Tab, (t: Tab) => void, boolean] {
+const TAB_LABELS: Record<Tab, string> = {
+  android: "Android",
+  ios: "iPhone / iPad",
+  computer: "Computer",
+};
+
+function usePlatformTab(allowed: readonly Tab[]): [Tab, (t: Tab) => void, boolean] {
   const hydrated = useHydrated();
   const [pick, setPick] = useState<Tab | null>(null);
-  const tab =
-    pick ??
-    (hydrated
-      ? defaultTab(detectPlatform(navigator.userAgent, navigator.maxTouchPoints))
-      : "android");
+  const detected = hydrated
+    ? defaultTab(detectPlatform(navigator.userAgent, navigator.maxTouchPoints))
+    : "android";
+  const tab = pick ?? (allowed.includes(detected) ? detected : "android");
   return [tab, setPick, hydrated];
 }
 
-function PlatformTabs({ tab, onPick }: { tab: Tab; onPick: (t: Tab) => void }) {
+function PlatformTabs({
+  tabs,
+  tab,
+  onPick,
+}: {
+  tabs: readonly Tab[];
+  tab: Tab;
+  onPick: (t: Tab) => void;
+}) {
   return (
-    <div className="flex gap-2 mb-4">
-      {(["android", "ios"] as const).map((t) => (
+    <div className="flex flex-wrap gap-2 mb-4">
+      {tabs.map((t) => (
         <button
           key={t}
           type="button"
@@ -34,7 +47,7 @@ function PlatformTabs({ tab, onPick }: { tab: Tab; onPick: (t: Tab) => void }) {
           aria-pressed={tab === t}
           onClick={() => onPick(t)}
         >
-          {t === "android" ? "Android" : "iPhone / iPad"}
+          {TAB_LABELS[t]}
         </button>
       ))}
     </div>
@@ -45,27 +58,30 @@ const stepList = "list-decimal pl-5 text-[14px] leading-relaxed flex flex-col ga
 const faded = { color: "var(--faded)" } as const;
 
 export function PrivateDnsGuide() {
-  const [tab, setTab, hydrated] = usePlatformTab();
+  const [tab, setTab, hydrated] = usePlatformTab(["android", "ios", "computer"]);
   const creds = hydrated ? loadCreds() : null;
   const host = `${creds?.profileId ?? "yourprofileid"}.dns.nextdns.io`;
+  const dohUrl = `https://dns.nextdns.io/${creds?.profileId ?? "yourprofileid"}`;
   const [copied, setCopied] = useState(false);
 
-  const copyHost = async () => {
+  const copy = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(host);
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* clipboard blocked — hostname is selectable above */
+      /* clipboard blocked — the value is selectable above */
     }
   };
+  const copyHost = () => copy(host);
 
   return (
     <section>
-      <span className="field-label">Point your phone at NextDNS</span>
+      <span className="field-label">Point your device at NextDNS</span>
       <p className="text-[13px] mb-3" style={faded}>
-        This is the switch that closes the trails phone-wide — apps and browsers
-        both. One setting, no app install required on Android.
+        This is the switch that actually closes the trails — at the network, not
+        in an app someone (you) can switch off. Extensions and apps are the park
+        scenery; DNS is the gate.
         {!creds && (
           <>
             {" "}
@@ -75,9 +91,44 @@ export function PrivateDnsGuide() {
         )}
       </p>
 
-      <PlatformTabs tab={tab} onPick={setTab} />
+      <PlatformTabs tabs={["android", "ios", "computer"]} tab={tab} onPick={setTab} />
 
-      {tab === "android" ? (
+      {tab === "computer" && (
+        <>
+          <ol className={stepList}>
+            <li>
+              In Chrome or Brave, open <strong>Settings → Privacy and security →
+              Security</strong> and find <strong>Use secure DNS</strong>
+            </li>
+            <li>
+              Pick <strong>With: Custom</strong> and paste your park&apos;s address:
+            </li>
+          </ol>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="field pass-code" style={{ background: "var(--cream-dark)" }}>
+              {dohUrl}
+            </span>
+            <button type="button" className="chip" onClick={() => copy(dohUrl)}>
+              {copied ? "copied ✓" : "copy"}
+            </button>
+          </div>
+          <p className="text-[13px] mt-3" style={faded}>
+            Now the browser itself asks NextDNS, so the trails stay closed even
+            with the extension switched off. For every browser and app on a Mac
+            at once, install the profile from{" "}
+            <a
+              className="permit-link"
+              href="https://apple.nextdns.io"
+              target="_blank"
+              rel="noreferrer"
+            >
+              apple.nextdns.io
+            </a>{" "}
+            instead — same two minutes, whole machine.
+          </p>
+        </>
+      )}
+      {tab === "android" && (
         <>
           <ol className={stepList}>
             <li>
@@ -106,7 +157,8 @@ export function PrivateDnsGuide() {
             means the closure is holding.
           </p>
         </>
-      ) : (
+      )}
+      {tab === "ios" && (
         <>
           <ol className={stepList}>
             <li>
@@ -147,7 +199,7 @@ export function PrivateDnsGuide() {
 }
 
 export function HomeScreenGuide() {
-  const [tab, setTab] = usePlatformTab();
+  const [tab, setTab] = usePlatformTab(["android", "ios"]);
 
   return (
     <section>
@@ -157,7 +209,7 @@ export function HomeScreenGuide() {
         pass gate one tap from where the doomscroll app used to sit.
       </p>
 
-      <PlatformTabs tab={tab} onPick={setTab} />
+      <PlatformTabs tabs={["android", "ios"]} tab={tab} onPick={setTab} />
 
       {tab === "android" ? (
         <ol className={stepList}>

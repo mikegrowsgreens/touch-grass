@@ -41,6 +41,6 @@ describe("defaultTab", () => {
   it("ios stays ios, everything else lands on android", () => {
     expect(defaultTab("ios")).toBe("ios");
     expect(defaultTab("android")).toBe("android");
-    expect(defaultTab("other")).toBe("android");
+    expect(defaultTab("other")).toBe("computer");
   });
 });
