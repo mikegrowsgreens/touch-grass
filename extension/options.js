@@ -45,6 +45,12 @@ async function load() {
   $("syncCode").value = sync?.syncId ?? "";
   $("syncStatus").textContent = sync ? "Following the shared park settings." : "";
   $("syncStatus").className = "pass-status ok";
+
+  // Locked gates: blocklist edits go through the web office's gauntlet.
+  const locked = cfg.locked === true;
+  $("domains").disabled = locked;
+  $("save").disabled = locked;
+  $("lockedNote").style.display = locked ? "block" : "none";
   $("domains").value = cfg.sites.join("\n");
   $("giphyKey").value = s.giphyKey;
 

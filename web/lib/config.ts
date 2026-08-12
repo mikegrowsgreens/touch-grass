@@ -12,6 +12,8 @@ export interface ParkConfig {
   workPermit: { domain: string; min: number };
   strict: { dayPass: boolean; workPermit: boolean };
   theme: { preset: ThemePreset; terms?: string[] };
+  /** Gates locked: editing settings first requires winning the gauntlet. */
+  locked: boolean;
 }
 
 export const DEFAULT_CONFIG: ParkConfig = {
@@ -27,6 +29,7 @@ export const DEFAULT_CONFIG: ParkConfig = {
   workPermit: { domain: "linkedin.com", min: 30 },
   strict: { dayPass: false, workPermit: true },
   theme: { preset: "cats" },
+  locked: false,
 };
 
 export const DAY_PASS_CHOICES = [1, 2, 5, 10] as const;
@@ -106,6 +109,7 @@ export function sanitizeConfig(raw: unknown): ParkConfig {
         typeof strictRaw.workPermit === "boolean" ? strictRaw.workPermit : d.strict.workPermit,
     },
     theme: terms ? { preset, terms } : { preset },
+    locked: o.locked === true,
   };
 }
 

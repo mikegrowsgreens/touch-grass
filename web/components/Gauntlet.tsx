@@ -24,7 +24,8 @@ export interface GatePass {
   domain: string;
   minutes: number;
   strict: boolean;
-  kind: "day" | "work";
+  /** "office" gates the park office (settings) — no NextDNS call, no pass. */
+  kind: "day" | "work" | "office";
 }
 
 type Phase =
@@ -115,7 +116,7 @@ export default function Gauntlet({
         if (r.done) {
           setPhase({ at: "issued" });
           onIssued();
-          void unlockViaNextDns();
+          if (pass.kind !== "office") void unlockViaNextDns();
           return;
         }
         setG(r.state);
@@ -152,7 +153,8 @@ export default function Gauntlet({
     });
   }
 
-  const label = pass.kind === "work" ? "Work permit" : "Day pass";
+  const label =
+    pass.kind === "office" ? "Office keys" : pass.kind === "work" ? "Work permit" : "Day pass";
 
   return (
     <div className="overlay" role="dialog" aria-modal="true" aria-label="Ranger station">
@@ -160,11 +162,14 @@ export default function Gauntlet({
         <div className="station-header">
           <div>
             <p className="station-kicker">
-              Ranger station · {label} · {pass.domain}
+              Ranger station · {label}
+              {pass.kind === "office" ? "" : ` · ${pass.domain}`}
             </p>
             <h2 className="slab">
               {phase.at === "issued"
-                ? "Pass issued"
+                ? pass.kind === "office"
+                  ? "Office open"
+                  : "Pass issued"
                 : `Challenge ${g.step + 1} of ${TOTAL} — ${GAME_NAMES[key]}`}
             </h2>
           </div>
@@ -188,7 +193,22 @@ export default function Gauntlet({
               <span className="sub">{phase.sub}</span>
             </div>
           )}
-          {phase.at === "issued" && (
+          {phase.at === "issued" && pass.kind === "office" && (
+            <div className="result win">
+              The office is open
+              <span className="sub">
+                Make your changes and save — the gates lock again behind you.
+              </span>
+              <button
+                className="cta cta-pine inline-block mt-5"
+                type="button"
+                onClick={onQuit}
+              >
+                Step inside
+              </button>
+            </div>
+          )}
+          {phase.at === "issued" && pass.kind !== "office" && (
             <div className="result win">
               Pass issued
               <span className="sub">

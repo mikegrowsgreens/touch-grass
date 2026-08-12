@@ -18,6 +18,7 @@ export const DEFAULT_CONFIG = {
   workPermit: { domain: "linkedin.com", min: 30 },
   strict: { dayPass: false, workPermit: true },
   theme: { preset: "cats" },
+  locked: false,
 };
 
 export const MAX_SITES = 30;
@@ -89,6 +90,7 @@ export function sanitizeConfig(raw) {
         typeof strictRaw.workPermit === "boolean" ? strictRaw.workPermit : d.strict.workPermit,
     },
     theme: terms ? { preset, terms } : { preset },
+    locked: o.locked === true,
   };
 }
 

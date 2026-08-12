@@ -27,6 +27,13 @@ describe("sanitizeConfig", () => {
     expect(sanitizeConfig({})).toEqual(DEFAULT_CONFIG);
   });
 
+  it("locked passes through as strict boolean only", () => {
+    expect(sanitizeConfig({ v: 1, locked: true }).locked).toBe(true);
+    expect(sanitizeConfig({ v: 1 }).locked).toBe(false);
+    expect(sanitizeConfig({ v: 1, locked: "yes" }).locked).toBe(false);
+    expect(sanitizeConfig({ v: 1, locked: 1 }).locked).toBe(false);
+  });
+
   it("dedupes and normalizes sites, falls back to defaults when all invalid", () => {
     expect(sanitizeConfig({ v: 1, sites: ["a.com", "WWW.A.com", "b.org"] }).sites).toEqual([
       "a.com",

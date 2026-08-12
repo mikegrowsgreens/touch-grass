@@ -16,6 +16,8 @@ const MESSY_INPUTS: unknown[] = [
   { v: 1, theme: { preset: "custom", terms: [] } },
   { v: 1, strict: { dayPass: true, workPermit: false }, dayPassMin: 5 },
   { v: 1, sites: Array.from({ length: 30 }, (_, i) => `site${i}.com`) },
+  { v: 1, locked: true },
+  { v: 1, locked: "yes" }, // non-boolean must coerce to false identically
 ];
 
 describe("extension parkpass parity", () => {

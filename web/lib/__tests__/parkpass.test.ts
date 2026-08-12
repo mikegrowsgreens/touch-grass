@@ -9,6 +9,7 @@ const custom: ParkConfig = {
   workPermit: { domain: "reddit.com", min: 45 },
   strict: { dayPass: true, workPermit: true },
   theme: { preset: "custom", terms: ["capybara", "café dög ☕"] },
+  locked: true,
 };
 
 describe("park-pass codec", () => {

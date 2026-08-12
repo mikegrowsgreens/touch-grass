@@ -30,6 +30,33 @@ export default function Setup() {
   const cfg = draft ?? (hydrated ? loadConfig() ?? DEFAULT_CONFIG : DEFAULT_CONFIG);
   const patch = (p: Partial<ParkConfig>) => setDraft({ ...cfg, ...p });
 
+  // Locked gates: setup would be a back door around the office gauntlet.
+  if (hydrated && loadConfig()?.locked) {
+    return (
+      <main className="min-h-screen flex items-start justify-center px-4 py-8">
+        <div className="sign">
+          <h1 className="park-name">Ranger Station</h1>
+          <p className="park-sub">Setup closed — gates locked</p>
+          <p className="notice mt-7 mb-3">This park is already established.</p>
+          <p className="text-center text-[15px] mb-6" style={{ color: "var(--faded)" }}>
+            The gates are locked, so changes go through the park office — and the
+            office only opens after a gauntlet win.
+          </p>
+          <div className="flex justify-center">
+            <Link href="/settings" className="cta no-underline">
+              To the park office
+            </Link>
+          </div>
+          <div className="dashed-rule mt-7 pt-4">
+            <Link href="/" className="permit-link">
+              ← the park
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   const finish = () => {
     void pushConfig(saveConfig(cfg));
     router.push("/");

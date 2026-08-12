@@ -16,6 +16,7 @@ import { useHydrated } from "@/lib/useHydrated";
 import { PassRules, SitesPicker, ThemePicker } from "@/components/config/sections";
 import { RangerRadio } from "@/components/config/nextdns";
 import { loadCreds, reconcileDenylist } from "@/lib/nextdns";
+import Gauntlet from "@/components/Gauntlet";
 import {
   clearSyncState,
   createSync,
@@ -29,6 +30,11 @@ export default function Settings() {
   const router = useRouter();
   const hydrated = useHydrated();
   const [draft, setDraft] = useState<ParkConfig | null>(null);
+
+  // Locked gates: the form only renders after a gauntlet win this visit.
+  const [officeOpen, setOfficeOpen] = useState(false);
+  const [gate, setGate] = useState(false);
+  const [lockArmed, setLockArmed] = useState(false);
 
   // null = untouched this session (read storage); "" = explicitly unlinked.
   const [syncOverride, setSyncOverride] = useState<string | null>(null);
@@ -92,6 +98,49 @@ export default function Settings() {
       /* selectable below */
     }
   };
+
+  const setLocked = (locked: boolean) => {
+    const clean = saveConfig({ ...cfg, locked });
+    void pushConfig(clean);
+    setDraft(clean);
+    setLockArmed(false);
+    if (locked) setOfficeOpen(false); // gates shut behind you immediately
+  };
+
+  // Locked and no keys earned yet: the office is a closed door.
+  if (hydrated && cfg.locked && !officeOpen) {
+    return (
+      <main className="min-h-screen flex items-start justify-center px-4 py-8">
+        <div className="sign">
+          <h1 className="park-name">Park Office</h1>
+          <p className="park-sub">Gates locked by request of the ranger (you)</p>
+          <p className="notice mt-7 mb-3">The office is locked.</p>
+          <p className="text-center text-[15px] mb-6" style={{ color: "var(--faded)" }}>
+            You asked for this: changing closures, passes, or the radio now costs
+            the same as a pass — beat all three ranger games in a row and the
+            office opens for one visit.
+          </p>
+          <div className="flex flex-col items-center gap-3 mb-4">
+            <button type="button" className="cta" onClick={() => setGate(true)}>
+              Win the office keys
+            </button>
+          </div>
+          <div className="dashed-rule mt-7 pt-4">
+            <Link href="/" className="permit-link">
+              ← the park
+            </Link>
+          </div>
+        </div>
+        {gate && (
+          <Gauntlet
+            pass={{ domain: "", minutes: 0, strict: false, kind: "office" }}
+            onQuit={() => setGate(false)}
+            onIssued={() => setOfficeOpen(true)}
+          />
+        )}
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen flex items-start justify-center px-4 py-8">
@@ -161,6 +210,56 @@ export default function Settings() {
               <p className="text-[13px] mt-2" style={{ color: "var(--pine)" }}>
                 {syncMsg}
               </p>
+            )}
+          </section>
+
+          <section className="dashed-rule pt-5">
+            <span className="field-label">Gate policy — who can change these rules</span>
+            {cfg.locked ? (
+              <>
+                <p className="text-[13px] mb-2" style={{ color: "var(--faded)" }}>
+                  The gates are locked: this office only opens after a gauntlet
+                  win, on every device. Unlocking makes settings freely editable
+                  again — no games required.
+                </p>
+                {lockArmed ? (
+                  <div className="flex items-center gap-3">
+                    <button type="button" className="chip" onClick={() => setLocked(false)}>
+                      yes, unlock the gates
+                    </button>
+                    <button type="button" className="chip" onClick={() => setLockArmed(false)}>
+                      never mind
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button" className="chip" onClick={() => setLockArmed(true)}>
+                    unlock the gates
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-[13px] mb-2" style={{ color: "var(--faded)" }}>
+                  Right now anyone with your phone (you, at midnight) can open
+                  this office and delist a trail in four taps. Lock the gates and
+                  every future change — closures, passes, radio, sync — first
+                  costs a full gauntlet run.
+                </p>
+                {lockArmed ? (
+                  <div className="flex items-center gap-3">
+                    <button type="button" className="chip" onClick={() => setLocked(true)}>
+                      lock it — I&apos;ll play for changes
+                    </button>
+                    <button type="button" className="chip" onClick={() => setLockArmed(false)}>
+                      never mind
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button" className="chip" onClick={() => setLockArmed(true)}>
+                    lock the gates
+                  </button>
+                )}
+              </>
             )}
           </section>
         </div>
