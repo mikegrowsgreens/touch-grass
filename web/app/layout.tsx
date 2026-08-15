@@ -49,6 +49,7 @@ export default function RootLayout({
             gtag('js', new Date());
             gtag('config', 'G-LCRF7SMS2P');`}
         </Script>
+        <Script src="https://mikegrowsgreens.com/frame.js" data-theme="dark" strategy="afterInteractive" />
       </body>
     </html>
   );
