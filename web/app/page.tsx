@@ -25,6 +25,7 @@ export default function Park() {
   const hydrated = useHydrated();
   const [freshStats, setFreshStats] = useState<ParkStats | null>(null);
   const stats = freshStats ?? (hydrated ? getVisitStats() : null);
+  const radioOffline = hydrated && !loadCreds();
   const [cfgVersion, setCfgVersion] = useState(0);
   const cfg = useMemo(
     () => (hydrated ? loadConfig() : null),
@@ -132,6 +133,24 @@ export default function Park() {
 
         {cfg ? (
           <div className="mb-6">
+            {radioOffline && (
+              <p
+                className="text-[13px] mb-4 px-3 py-2"
+                style={{
+                  color: "var(--cream)",
+                  background: "var(--rust)",
+                  borderRadius: 8,
+                }}
+              >
+                <strong>Ranger radio offline</strong> — game wins issue
+                honor-system passes only; the trails stay closed. Wire your
+                NextDNS key in the{" "}
+                <Link href="/settings" className="underline" style={{ color: "var(--cream)" }}>
+                  park office
+                </Link>{" "}
+                to make wins actually open gates.
+              </p>
+            )}
             <span className="field-label">Trail closures in effect</span>
             <div>
               {cfg.sites.map((site) => (
